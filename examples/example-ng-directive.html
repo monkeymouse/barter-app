@@ -1,115 +1,200 @@
 <!DOCTYPE HTML>
 <html>
-    <head>
-        <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.0.7/angular.min.js"></script>
-        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-        <title>
-            {block:PostSummary}{PostSummary} - {/block:PostSummary}{Title}        
-    	</title>
-        <script>
-            var barter = angular.module( "barter", [ ] );
-            barter.controller( "ContentController",
-                function( $scope ){
-                    $scope.postList = $scope.postList || [ ];
-                    $scope.$watch( "postList",
-                        function( ){
-                            console.debug( $scope.postList );
-                        } );
-                } );
-            barter.directive( "postText", function( ){
-                return {
-                    "restrict": "E",
-                    "scope": {
-                        "postList": "="
-                    },
-                    "link": function( scope, element ){
-                        var postText = { };
-                        var postElement = $( element );
-                        if( postElement.html( ).replace( /\s+/, "" ) ){
-                            postElement.find( "post-title, post-body, post-date, post-like-count, post-tags" )
-                                .each( function( ){
-                                    var postComponent = $( this );
-                                    var postType = this.nodeName.toLowerCase( ).replace( "post-", "" );
-                                    switch( postType ){
-                                        case "title":
-                                            postText.title = postComponent.html( ).trim( );
-                                            break;
-                                            
-                                        case "body":
-                                            postText.body = $( postComponent.html( ).trim( ) );
-                                            break;
-                                            
-                                        case "date":
-                                            postText.date = new Date( Date( parseInt( postComponent.html( ).trim( ) ) ) );
-                                            break;
-                                            
-                                        case "like-count":
-                                            var likeCount = parseInt( postComponent.html( ).trim( ) );
-                                            if( likeCount ){
-                                                postText.likeCount = likeCount;    
-                                            }
-                                            break;
-                                            
-                                        case "tags":
-                                            postText.tags = [ ];
-                                            postComponent.find( "tag" )
-                                                .each( function( ){
-                                                    var tag = $( this ).html( ).trim( );
-                                                    if( tag ){
-                                                        postText.tags.push( tag );    
-                                                    }                                              
-                                                } );
-                                    }
-                                } );
-                            
-                            scope.postList.push( postText );
-                            
-                            setTimeout( function( ){
-                                postElement.remove( );
-                            } );
-                        }                      
-                    }
-                }
-            } );
-        </script>
-    </head>
-    <body>
-        <barter ng-app="barter">
-            <barter-content ng-controller="ContentController">
-                <post post-list="postList">
-                {block:Posts}
-                    <post-text post-list="postList">
-                    {block:Text}
-                        <post-title>
-                        {block:Title} 
-                            {Title}
-                        {/block:Title}
-                        </post-title>
-                        <post-body>
-                            {Body}
-                        </post-body>
-                        <post-date>
-                        {block:Date}
-                            {Timestamp}
-                        {/block:Date}
-                        </post-date>
-                        <post-like-count>
-                        {block:NoteCount}
-                            {NoteCount}
-                        {/block:NoteCount}
-                        </post-like-count>
-                        <post-tags>
-                        {block:HasTags}
-                            {block:Tags} 
-                                <tag>{Tag}</tag>
-                            {/block:Tags}
-                        {/block:HasTags}
-                        </post-tags>
-                    {/block:Text}
-                    </post-text>
-                {/block:Posts}
-                </post>
-            </barter-content>
-        </barter>
-    </body>
+	<head>
+		<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.0.7/angular.min.js"></script>
+		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+		<title>
+			{block:PostSummary}{PostSummary} - {/block:PostSummary}{Title}		
+		</title>
+		<script>
+			function encode( data ) {
+				return window.btoa( unescape( encodeURIComponent( data ) ) );
+			}
+
+			function decode( data ) {
+				return decodeURIComponent( escape( window.atob( data ) ) );
+			}
+
+			var barter = angular.module( "barter", [ ] );
+			
+			barter.controller( "ContentController",
+				function( $scope ){
+					$scope.postList = $scope.postList || [ ];
+					$scope.$watch( "postList",
+						function( ){
+							console.debug( "CONTENT-CONTROLLER: ", $scope.postList );
+
+							//Send the data to the original page.
+							//This will not execute if the current has no iframe.
+							if( window.location.href != window.parent.location.href ){
+								var data = encode( JSON.stringify( $scope.postList ) );
+								$( window.parent.document ).contents( )
+									.find( "pagination" ).attr( "post-list-update", data );
+							}
+						} );
+				} );
+
+			barter.directive( "pagination", function( ){
+				return {
+					"restrict": "E",
+					"scope": {
+						"postList": "=",
+						"postListUpdate": "@"
+					},
+					"link": function( scope, element ){
+						var pagination = $( element );
+						
+						//Checks if we are inside an iframe.
+						if( window.location.href != window.parent.location.href ){
+							console.log( "We are inside an iframe." )
+							return;
+						}
+
+						console.log( "We are not inside iframe." );
+						
+						pagination.find( "previous-page, next-page" )
+							.each( function( ){
+								var page = $( this );
+								var pageType = this.nodeName.toLowerCase( ).replace( "-page", "" );
+								var iframe = $( "<iframe></iframe>" )
+									.attr( {
+										"src": page.attr( "source" ),
+										"type": pageType
+									} );
+								pagination.append( iframe );
+							} );
+
+						scope.$watch( "postListUpdate",
+							function( ){
+								console.log( "List update: " + scope.postListUpdate );
+							} );
+					}
+				};
+			} );
+			barter.directive( "postText", function( ){
+				return {
+					//The restrict is used to assign the directive to the tag name for E.
+					"restrict": "E",
+					//The scope is used to bind data from the element to the ng scope.
+					//The = here is used to bind bidirectional data binding. It means
+					//A change in the element and parent scope( controller ) will affect a change
+					//  in the local scope ( directive ) and vice versa
+					"scope": {
+						"postList": "="
+					},
+					//This is used to manipulate the scope, element and attributes where
+					//  the directive is assigned. This includes the contents of the element.
+					"link": function( scope, element ){
+						var postText = { "type": "text" };
+						var postElement = $( element );
+						if( postElement.html( ).replace( /\s+/, "" ) ){
+							postElement.find( "post-title, post-body, post-date, post-like-count, post-tags" )
+								.each( function( ){
+									var postComponent = $( this );
+									//Read the content elements of this post.
+									//This will match what you put on the body.
+									var postType = this.nodeName.toLowerCase( ).replace( "post-", "" );
+									switch( postType ){
+										case "title":
+											postText.title = postComponent.html( ).trim( );
+											break;
+											
+										case "body":
+											postText.body = postComponent.html( ).trim( );
+											break;
+											
+										case "date":
+											postText.date = new Date( Date( parseInt( postComponent.html( ).trim( ) ) ) );
+											break;
+											
+										case "like-count":
+											var likeCount = parseInt( postComponent.html( ).trim( ) );
+											if( likeCount ){
+												postText.likeCount = likeCount;	
+											}
+											break;
+											
+										case "tags":
+											postText.tags = [ ];
+											postComponent.find( "tag" )
+												.each( function( ){
+													var tag = $( this ).html( ).trim( );
+													if( tag ){
+														postText.tags.push( tag );	
+													}											  
+												} );
+									}
+								} );
+							
+							scope.postList.push( postText );
+							
+							setTimeout( function( ){
+								//Once we get the data, remove the post because we will override
+								//  it with our default view.
+								postElement.remove( );
+							} );
+						}					  
+					}
+				}
+			} );
+		</script>
+	</head>
+	<body>
+		<barter ng-app="barter">
+			<barter-content ng-controller="ContentController">
+				<post post-list="postList">
+				{block:Posts}
+					<!--
+						Using angular directive, "post-text" tag name will be
+							trnasformed into "postText" camel case format.
+
+						So in order to create your own directive, construct a tag name,
+							Example: "post-image" 
+						Then access the element using the directive postImage,
+							Example: barter.directive( "postImage", function( ){ } );
+					-->
+					<post-text post-list="postList">
+					{block:Text}
+						<post-title>
+						{block:Title} 
+							{Title}
+						{/block:Title}
+						</post-title>
+						<post-body>
+							{Body}
+						</post-body>
+						<post-date>
+						{block:Date}
+							{Timestamp}
+						{/block:Date}
+						</post-date>
+						<post-like-count>
+						{block:NoteCount}
+							{NoteCount}
+						{/block:NoteCount}
+						</post-like-count>
+						<post-tags>
+						{block:HasTags}
+							{block:Tags} 
+								<tag>{Tag}</tag>
+							{/block:Tags}
+						{/block:HasTags}
+						</post-tags>
+					{/block:Text}
+					</post-text>
+				{/block:Posts}
+				</post>
+				<pagination post-list="postList" post-list-update="">
+				{block:Pagination}
+					{block:PreviousPage}
+						<previous-page source="{PreviousPage}"></previous-page>
+					{/block:PreviousPage}
+					{block:NextPage}
+						<next-page source="{NextPage}"></next-page>
+					{/block:NextPage}
+				{/block:Pagination}
+				</pagination>
+			</barter-content>
+		</barter>
+	</body>
 </html>

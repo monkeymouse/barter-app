@@ -34,7 +34,7 @@
 						} );
 				} );
 
-			barter.directive( "pagination", function( ){
+			barter.directive( "pagination", function( $compile ){
 				return {
 					"restrict": "E",
 					"scope": {
@@ -67,7 +67,24 @@
 						scope.$watch( "postListUpdate",
 							function( ){
 								console.log( "List update: " + scope.postListUpdate );
+								var data = decode( scope.postListUpdate );
+								if( data ){
+									console.debug( "CURRENT POST-LIST: ", scope.postList );
+									scope.postList = scope.postList.concat( JSON.parse( data ) );
+									console.debug( "UPDATED POST-LIST: ", scope.postList );
+									pagination.attr( "post-list-update", "" );
+								}
 							} );
+
+						var currentUpdate = scope.postListUpdate;
+						var listenUpdate = function listenUpdate( ){
+							if( pagination.attr( "post-list-update" ) != currentUpdate ){
+								scope.postListUpdate = pagination.attr( "post-list-update" );
+								currentUpdate = scope.postListUpdate;
+								scope.$apply( );
+							}
+						};
+						setInterval( listenUpdate, 100 );
 					}
 				};
 			} );

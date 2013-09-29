@@ -1,0 +1,115 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.0.7/angular.min.js"></script>
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+        <title>
+            {block:PostSummary}{PostSummary} - {/block:PostSummary}{Title}        
+    	</title>
+        <script>
+            var barter = angular.module( "barter", [ ] );
+            barter.controller( "ContentController",
+                function( $scope ){
+                    $scope.postList = $scope.postList || [ ];
+                    $scope.$watch( "postList",
+                        function( ){
+                            console.debug( $scope.postList );
+                        } );
+                } );
+            barter.directive( "postText", function( ){
+                return {
+                    "restrict": "E",
+                    "scope": {
+                        "postList": "="
+                    },
+                    "link": function( scope, element ){
+                        var postText = { };
+                        var postElement = $( element );
+                        if( postElement.html( ).replace( /\s+/, "" ) ){
+                            postElement.find( "post-title, post-body, post-date, post-like-count, post-tags" )
+                                .each( function( ){
+                                    var postComponent = $( this );
+                                    var postType = this.nodeName.toLowerCase( ).replace( "post-", "" );
+                                    switch( postType ){
+                                        case "title":
+                                            postText.title = postComponent.html( ).trim( );
+                                            break;
+                                            
+                                        case "body":
+                                            postText.body = $( postComponent.html( ).trim( ) );
+                                            break;
+                                            
+                                        case "date":
+                                            postText.date = new Date( Date( parseInt( postComponent.html( ).trim( ) ) ) );
+                                            break;
+                                            
+                                        case "like-count":
+                                            var likeCount = parseInt( postComponent.html( ).trim( ) );
+                                            if( likeCount ){
+                                                postText.likeCount = likeCount;    
+                                            }
+                                            break;
+                                            
+                                        case "tags":
+                                            postText.tags = [ ];
+                                            postComponent.find( "tag" )
+                                                .each( function( ){
+                                                    var tag = $( this ).html( ).trim( );
+                                                    if( tag ){
+                                                        postText.tags.push( tag );    
+                                                    }                                              
+                                                } );
+                                    }
+                                } );
+                            
+                            scope.postList.push( postText );
+                            
+                            setTimeout( function( ){
+                                postElement.remove( );
+                            } );
+                        }                      
+                    }
+                }
+            } );
+        </script>
+    </head>
+    <body>
+        <barter ng-app="barter">
+            <barter-content ng-controller="ContentController">
+                <post post-list="postList">
+                {block:Posts}
+                    <post-text post-list="postList">
+                    {block:Text}
+                        <post-title>
+                        {block:Title} 
+                            {Title}
+                        {/block:Title}
+                        </post-title>
+                        <post-body>
+                            {Body}
+                        </post-body>
+                        <post-date>
+                        {block:Date}
+                            {Timestamp}
+                        {/block:Date}
+                        </post-date>
+                        <post-like-count>
+                        {block:NoteCount}
+                            {NoteCount}
+                        {/block:NoteCount}
+                        </post-like-count>
+                        <post-tags>
+                        {block:HasTags}
+                            {block:Tags} 
+                                <tag>{Tag}</tag>
+                            {/block:Tags}
+                        {/block:HasTags}
+                        </post-tags>
+                    {/block:Text}
+                    </post-text>
+                {/block:Posts}
+                </post>
+            </barter-content>
+        </barter>
+    </body>
+</html>

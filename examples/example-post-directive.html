@@ -54,6 +54,7 @@
 							scope.postList[ scope.currentPageNumber ] = postList || [ ]
 						}
 						//Push changes to the post list by page number.
+						postData.type = type;
 						scope.postList[ scope.currentPageNumber ].push( postData );
 						setTimeout( function( ){
 							//Once we get the data, remove the post because we will override

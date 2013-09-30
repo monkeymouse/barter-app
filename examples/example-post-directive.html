@@ -14,10 +14,20 @@
 			barter.controller( "ContentController",
 				function( $scope ){
 					$scope.postList = $scope.postList || { };
+					$scope.aggregatePostList = [ ];
+					$scope.viewablePostList = [ ];
+					
 					$scope.currentPageNumber = 1;
+					$scope.pageLimit = 15;
+					
 					$scope.$watch( "postList",
 						function( ){
 							console.debug( "CONTENT-CONTROLLER: ", $scope );
+							$scope.aggregatePostList = _.values( $scope.postList );
+						} );
+					$scope.$watch( "aggregatePostList",
+						function( ){
+							$scope.viewablePostList = $scope.aggregatePostList.slice( 0, $scope.pageLimit );
 						} );
 				} );
 

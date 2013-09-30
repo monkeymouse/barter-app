@@ -3,6 +3,10 @@
 	<head>
 		<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.0.7/angular.min.js"></script>
 		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+		<script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore-min.js"></script>
+		<script src="//cdnjs.cloudflare.com/ajax/libs/async/0.2.7/async.min.js"></script>
+		
+
 		<title>
 			{block:PostSummary}{PostSummary} - {/block:PostSummary}{Title}		
 		</title>
@@ -19,14 +23,43 @@
 			
 			barter.controller( "ContentController",
 				function( $scope ){
-					$scope.postList = $scope.postList || [ ];
+					$scope.postList = $scope.postList || { };
+					$scope.nextPostList = $scope.nextPostList || [ ]; 
+					$scope.currentPageNumber = 1;
+					$scope.previousPageNumber = 1;
+					$scope.nextPageNumber = 2;
+
+					$scope.nextPage = function nextPage( ){
+						console.log( "Content controller next page." );
+					};
+
+					$scope.previousPage = function previousPage( ){
+						console.log( "Content controller previous page." );
+					};
+
+					$scope.$watch( "currentPageNumber",
+						function( ){
+
+						} );
+
 					$scope.$watch( "postList",
 						function( ){
-							console.debug( "CONTENT-CONTROLLER: ", $scope.postList );
+							console.debug( "CONTENT-CONTROLLER: ", $scope );
 
 							//Send the data to the original page.
 							//This will not execute if the current has no iframe.
+							/*if( window.location.href != window.parent.location.href ){
+								$( window.document ).contents
+								var data = encode( JSON.stringify( $scope.postList ) );
+								$( window.parent.document ).contents( )
+									.find( "pagination" ).attr( "post-list-update", data );
+							}*/
+						} );
+
+					$scope.$watch( "nextPostList",
+						function( ){
 							if( window.location.href != window.parent.location.href ){
+								$( window.document ).contents
 								var data = encode( JSON.stringify( $scope.postList ) );
 								$( window.parent.document ).contents( )
 									.find( "pagination" ).attr( "post-list-update", data );
@@ -34,53 +67,150 @@
 						} );
 				} );
 
-			barter.directive( "pagination", function( $compile ){
+			barter.directive( "nextPage",
+				function( ){
+					return {
+						"restrict": "E",
+						"scope": {
+							"nextPageNumber": "=",
+							"nextPage": "="
+						},
+						"link": function( scope, element ){
+							//Checks if we are inside an iframe.
+							if( window.location.href != window.parent.location.href ){
+								return;
+							}
+
+							$( element ).click( function( ){
+								scope.nextPage( );
+							} );
+
+							var pagination = $( "pagination" );
+							scope.$watch( "nextPageNumber",
+								function( newValue ){
+									if( newValue ){
+										var iframe = $( "<iframe></iframe>" )
+											.attr( {
+												"src": "/page/" + scope.nextPageNumber,
+												"type": pageType
+											} );
+										pagination.append( iframe );
+									}
+								} );
+						}
+					};
+				} );
+
+			barter.directive( "previousPage",
+				function( ){
+					return {
+						"restrict": "E",
+						"scope": {
+							"previousPageNumber": "=",
+							"previousPage": "="
+						},
+						"link": function( scope, element ){
+							console.debug( "PREVIOUS-PAGE: ", scope );
+							$( element ).click( function( ){
+								scope.previousPage( );
+							} );
+						}
+					};
+				} );
+
+			barter.directive( "pagination", function( ){
 				return {
 					"restrict": "E",
 					"scope": {
 						"postList": "=",
-						"postListUpdate": "@"
+						"totalPageCount": "=",
+						"currentPageNumber": "=",
+						"nextPageNumber": "=",
+						"previousPageNumber": "=",
+						"nextPage": "=",
+						"previousPage": "=",
+						"nextPostList": "=",
+						"previousPostList": "="
 					},
 					"link": function( scope, element ){
 						var pagination = $( element );
-						
+
+						console.debug( "PAGINATION: ", scope );
+
 						//Checks if we are inside an iframe.
 						if( window.location.href != window.parent.location.href ){
-							console.log( "We are inside an iframe." )
 							return;
 						}
 
-						console.log( "We are not inside iframe." );
-						
-						pagination.find( "previous-page, next-page" )
-							.each( function( ){
-								var page = $( this );
-								var pageType = this.nodeName.toLowerCase( ).replace( "-page", "" );
-								var iframe = $( "<iframe></iframe>" )
-									.attr( {
-										"src": page.attr( "source" ),
-										"type": pageType
-									} );
-								pagination.append( iframe );
-							} );
+						scope.nextPage = function nextPage( ){
+							scope.currentPageNumber++;
+							scope.nextPageNumber++;
+							scope.previousPageNumber++;
 
-						scope.$watch( "postListUpdate",
+							if( scope.currentPageNumber > scope.totalPageCount ){
+								scope.currentPageNumber = 1;
+							}
+							if( scope.nextPageNumber > scope.totalPageCount ){
+								scope.nextPageNumber = 1;
+							}
+							if( scope.previousPageNumber > scope.totalPageCount ){
+								scope.previousPageNumber = 1;
+							}
+							scope.$apply( );
+						};
+
+						scope.previousPage = function previousPage( ){
+							scope.currentPageNumber--;
+							scope.nextPageNumber--;
+							scope.previousPageNumber--;
+
+							if( scope.currentPageNumber < 1 ){
+								scope.currentPageNumber = scope.totalPageCount;
+							}
+							if( scope.nextPageNumber < 1 ){
+								scope.nextPageNumber = scope.totalPageCount;
+							}
+							if( scope.previousPageNumber < 1 ){
+								scope.previousPageNumber = scope.totalPageCount;
+							}
+							scope.$apply( );
+						};
+
+						scope.$watch( "nextPostList",
 							function( ){
-								console.log( "List update: " + scope.postListUpdate );
-								var data = decode( scope.postListUpdate );
-								if( data ){
+								console.log( "List update: " + scope.nextPostList );
+								var data = decode( scope.nextPostList );
+								/*if( data ){
 									console.debug( "CURRENT POST-LIST: ", scope.postList );
 									scope.postList = scope.postList.concat( JSON.parse( data ) );
 									console.debug( "UPDATED POST-LIST: ", scope.postList );
 									pagination.attr( "post-list-update", "" );
-								}
+								}*/
 							} );
 
-						var currentUpdate = scope.postListUpdate;
+						scope.$watch( "previousPostList",
+							function( ){
+								console.log( "List update: " + scope.previousPostList );
+								var data = decode( scope.previousPostList );
+								/*if( data ){
+									console.debug( "CURRENT POST-LIST: ", scope.postList );
+									scope.postList = scope.postList.concat( JSON.parse( data ) );
+									console.debug( "UPDATED POST-LIST: ", scope.postList );
+									pagination.attr( "post-list-update", "" );
+								}*/
+							} );
+
+						//This will force the next and previous post list to be updated.
+						var currentNextPostList = scope.nextPostList;
+						var currentPreviousPostList = scope.previousPostList;
 						var listenUpdate = function listenUpdate( ){
-							if( pagination.attr( "post-list-update" ) != currentUpdate ){
-								scope.postListUpdate = pagination.attr( "post-list-update" );
-								currentUpdate = scope.postListUpdate;
+							if( pagination.attr( "next-post-list" ) != currentNextPostList
+								|| pagination.attr( "previous-post-list" ) != currentPreviousPostList )
+							{
+								scope.nextPostList = pagination.attr( "next-post-list" );
+								scope.previousPostList = pagination.attr( "previous-post-list" );
+								currentNextPostList = scope.nextPostList;
+								currentPreviousPostList = scope.previousPostList;
 								scope.$apply( );
 							}
 						};
@@ -88,7 +218,62 @@
 					}
 				};
 			} );
-			barter.directive( "postText", function( ){
+
+			/*
+				type:
+				components:
+				parser: postComponent, callback -> object
+			*/
+			barter.service( "postParser", function( ){
+				this.parse = function parse( data ){
+					var scope = data.scope;
+
+					if( !( "postList" in scope && "currentPageNumber" in scope ) ){
+						console.debug( "The given scope does not contain the required dependencies.", scope );
+						return;
+					}
+
+					var element = data.element;
+					var type = data.type;
+					var components = data.components;
+					var parser = data.parser;
+
+					var postComponents = _.map( components,
+						function( component ){
+							return "post-" + component;
+						} );
+
+					var postElement = $( element );
+					if( postElement.html( ).replace( /\s+/, "" ) ){
+						var postData = { };
+						postElement.find( postComponents )
+							.each( function( ){
+								var postComponent = $( this );
+								var componentType = this.nodeName.toLowerCase( ).replace( "post-", "" );
+								parser( postComponent, componentType,
+									function( componentData ){
+										_.extend( postData, _.pick( componentData, components ) );
+									} );
+							} );
+						
+						//Initialize the page index of the post list if not yet updated.
+						if( !( scope.currentPageNumber in scope.postList ) ){
+							var postList = scope.postList[ scope.currentPageNumber ];
+							scope.postList[ scope.currentPageNumber ] = postList || [ ]
+						}
+						//Push changes to the post list by page number.
+						scope.postList[ scope.currentPageNumber ].push( postData );
+						
+						setTimeout( function( ){
+							//Once we get the data, remove the post because we will override
+							//  it with our default view.
+							postElement.remove( );
+						}, 0 );
+					}
+				};
+			} );
+
+			barter.directive( "postText", function( postParser ){
 				return {
 					//The restrict is used to assign the directive to the tag name for E.
 					"restrict": "E",
@@ -97,60 +282,54 @@
 					//A change in the element and parent scope( controller ) will affect a change
 					//  in the local scope ( directive ) and vice versa
 					"scope": {
-						"postList": "="
+						"postList": "=",
+						"currentPageNumber": "="
 					},
 					//This is used to manipulate the scope, element and attributes where
 					//  the directive is assigned. This includes the contents of the element.
 					"link": function( scope, element ){
-						var postText = { "type": "text" };
-						var postElement = $( element );
-						if( postElement.html( ).replace( /\s+/, "" ) ){
-							postElement.find( "post-title, post-body, post-date, post-like-count, post-tags" )
-								.each( function( ){
-									var postComponent = $( this );
-									//Read the content elements of this post.
-									//This will match what you put on the body.
-									var postType = this.nodeName.toLowerCase( ).replace( "post-", "" );
-									switch( postType ){
-										case "title":
-											postText.title = postComponent.html( ).trim( );
-											break;
-											
-										case "body":
-											postText.body = postComponent.html( ).trim( );
-											break;
-											
-										case "date":
-											postText.date = new Date( Date( parseInt( postComponent.html( ).trim( ) ) ) );
-											break;
-											
-										case "like-count":
-											var likeCount = parseInt( postComponent.html( ).trim( ) );
-											if( likeCount ){
-												postText.likeCount = likeCount;	
-											}
-											break;
-											
-										case "tags":
-											postText.tags = [ ];
-											postComponent.find( "tag" )
-												.each( function( ){
-													var tag = $( this ).html( ).trim( );
-													if( tag ){
-														postText.tags.push( tag );	
-													}											  
-												} );
-									}
-								} );
-							
-							scope.postList.push( postText );
-							
-							setTimeout( function( ){
-								//Once we get the data, remove the post because we will override
-								//  it with our default view.
-								postElement.remove( );
-							} );
-						}					  
+						postParser.parse( {
+							"type": "text",
+							"scope": scope,
+							"element": element,
+							"components": [ "title", "body", "date", "like-count", "tags" ],
+							"parser": function parser( postComponent, componentType, callback ){
+								//Read the content elements of this post.
+								//This will match what you put on the body.
+								var componentData = { };
+								switch( componentType ){
+									case "title":
+										componentData.title = postComponent.html( ).trim( );
+										break;
+										
+									case "body":
+										componentData.body = postComponent.html( ).trim( );
+										break;
+										
+									case "date":
+										componentData.date = new Date( Date( parseInt( postComponent.html( ).trim( ) ) ) );
+										break;
+										
+									case "like-count":
+										var likeCount = parseInt( postComponent.html( ).trim( ) );
+										if( likeCount ){
+											componentData.likeCount = likeCount;	
+										}
+										break;
+										
+									case "tags":
+										componentData.tags = [ ];
+										postComponent.find( "tag" )
+											.each( function( ){
+												var tag = $( this ).html( ).trim( );
+												if( tag ){
+													componentData.tags.push( tag );	
+												}											  
+											} );
+								}
+								callback( componentData );
+							}
+						} );
 					}
 				}
 			} );
@@ -159,6 +338,25 @@
 	<body>
 		<barter ng-app="barter">
 			<barter-content ng-controller="ContentController">
+				<!--
+					Always put the pagination element at the top
+						inside the ContentController, this will make the ContentController
+						its parent scope.
+				-->
+				{block:Pagination}
+					<pagination 
+						post-list="postList" 
+						next-post-list="nextPostList"
+						previous-post-list="previousPostList"
+						total-page-count="{TotalPages}"
+						current-page-number="currentPageNumber"
+						next-page-number="nextPageNumber"
+						previous-page-number="previousPageNumber"
+						next-page="nextPage"
+						previous-page="previousPage">
+					</pagination>
+				{/block:Pagination}
+
 				<post post-list="postList">
 				{block:Posts}
 					<!--
@@ -167,10 +365,10 @@
 
 						So in order to create your own directive, construct a tag name,
 							Example: "post-image" 
-						Then access the element using the directive postImage,
+						Then access the element using the directive "postImage",
 							Example: barter.directive( "postImage", function( ){ } );
 					-->
-					<post-text post-list="postList">
+					<post-text post-list="postList" current-page-number="currentPageNumber">
 					{block:Text}
 						<post-title>
 						{block:Title} 
@@ -199,18 +397,24 @@
 						</post-tags>
 					{/block:Text}
 					</post-text>
+
+
 				{/block:Posts}
 				</post>
-				<pagination post-list="postList" post-list-update="">
-				{block:Pagination}
-					{block:PreviousPage}
-						<previous-page source="{PreviousPage}"></previous-page>
-					{/block:PreviousPage}
-					{block:NextPage}
-						<next-page source="{NextPage}"></next-page>
-					{/block:NextPage}
-				{/block:Pagination}
-				</pagination>
+				
+				<!--
+					These are the controls of the paging. You can put it anywhere
+						but below the pagination element and inside the Content Controller.
+				-->
+				<next-page next-page-number="nextPageNumber" next-page="nextPage">
+					<!--You can put whatever you want inside here-->
+					<a href="#page-{{ nextPageNumber }}">Next</a>
+				</next-page>
+				<previous-page previous-page-number="previousPageNumber" previous-page="previousPage">
+					<!--You can put whatever you want inside here-->
+					<a href="#page-{{ previousPageNumber }}">Previous</a>
+				</previous-page>
+				
 			</barter-content>
 		</barter>
 	</body>

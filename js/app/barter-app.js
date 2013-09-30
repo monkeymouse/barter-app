@@ -1,0 +1,1 @@
+var barter = angular.module( "barter", [ ] );

@@ -24,7 +24,7 @@
 					$scope.$watch( "postList",
 						function( ){
 							console.debug( "CONTENT-CONTROLLER: ", $scope );
-							$scope.aggregatePostList = _.values( $scope.postList );
+							$scope.aggregatePostList = _.flatten( _.values( $scope.postList ) );
 						} );
 					$scope.$watch( "aggregatePostList",
 						function( ){

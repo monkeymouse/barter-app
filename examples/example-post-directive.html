@@ -351,7 +351,7 @@
 							"type": "text",
 							"scope": scope,
 							"element": element,
-							"components": [ "chat", "line", "date", "like-count", "tags" ],
+							"components": [ "chat", "lines", "date", "like-count", "tags" ],
 							"parser": function parser( postComponent, componentType, callback ){
 								//Read the content elements of this post.
 								//This will match what you put on the body.
@@ -520,9 +520,12 @@
 							post-list="postList" 
 							current-page-number="currentPageNumber">
 							{block:Link}
-								<post-link>
-									<a href="{URL}">{Name}</a>
-								</post-link>
+								<post-link-url>
+									{URL}
+								</post-link-url>
+								<post-link-name>
+									{Name}
+								</post-link-name>
 								<post-description>
 									{Description}
 								</post-description>
@@ -545,7 +548,7 @@
 								</post-tags>
 							{/block:Link}
 						</post-link>
-						<post-Chat 
+						<post-chat 
 							post-list="postList" 
 							current-page-number="currentPageNumber">
 							{block:Chat}
@@ -554,16 +557,18 @@
 										{Title}
 									{/block:Title}
 								</post-title>
-								<post-line>
+								<post-lines>
 									{block:Lines}
-										<li class="{Alt}">
+										<line-label>
 											{block:Label}
-												<span class="who">{Label}</span>
+													{Label}
 											{/block:Label}
-											{Line}
-										</li>
+										</line-label>
+									<line-message>	
+										{Line}
+									</line-message>	
 									{/block:Lines}
-								</post-line>
+								</post-lines>
 								<post-date>
 									{block:Date}
 										{Timestamp}
@@ -582,7 +587,7 @@
 									{/block:HasTags}
 								</post-tags>
 							{/block:Link}
-						</post-Chat>
+						</post-chat>
 					{/block:Posts}
 				</post>
 			</barter-content>

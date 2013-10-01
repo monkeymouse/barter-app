@@ -222,10 +222,10 @@
 					//  the directive is assigned. This includes the contents of the element.
 					"link": function( scope, element ){
 						postParser.parse( {
-							"type": "text",
+							"type": "quote",
 							"scope": scope,
 							"element": element,
-							"components": [ "quote", "source", "date", "like-count", "tags" ],
+							"components": [ "quote-line", "source", "date", "like-count", "tags" ],
 							"parser": function parser( postComponent, componentType, callback ){
 								//Read the content elements of this post.
 								//This will match what you put on the body.
@@ -233,8 +233,8 @@
 								//postComponent is a jQuery object.
 								var componentData = { };
 								switch( componentType ){
-									case "quote":
-										componentData.quote = postComponent.html( ).trim( );
+									case "quote-line":
+										componentData.quoteLine = postComponent.html( ).trim( );
 										break;
 										
 									case "source":
@@ -285,7 +285,7 @@
 					//  the directive is assigned. This includes the contents of the element.
 					"link": function( scope, element ){
 						postParser.parse( {
-							"type": "text",
+							"type": "link",
 							"scope": scope,
 							"element": element,
 							"components": [ "url", "description", "date", "like-count", "tags" ],
@@ -348,10 +348,10 @@
 					//  the directive is assigned. This includes the contents of the element.
 					"link": function( scope, element ){
 						postParser.parse( {
-							"type": "text",
+							"type": "chat",
 							"scope": scope,
 							"element": element,
-							"components": [ "chat", "lines", "date", "like-count", "tags" ],
+							"components": [ "title", "lines", "date", "like-count", "tags" ],
 							"parser": function parser( postComponent, componentType, callback ){
 								//Read the content elements of this post.
 								//This will match what you put on the body.
@@ -359,12 +359,12 @@
 								//postComponent is a jQuery object.
 								var componentData = { };
 								switch( componentType ){
-									case "chat":
-										componentData.chat = postComponent.html( ).trim( );
+									case "title":
+										componentData.title = postComponent.html( ).trim( );
 										break;
 										
-									case "line":
-										componentData.line = postComponent.html( ).trim( );
+									case "lines":
+										componentData.lines = postComponent.html( ).trim( );
 										break;
 										
 									case "date":
@@ -491,9 +491,9 @@
 							post-list="postList" 
 							current-page-number="currentPageNumber">
 							{block:Quote}
-								<post-quote>
+								<post-quote-line>
 									{Quote}
-								</post-quote>
+								</post-quote-line>
 								<post-source>
 									{Source}
 								</post-source>

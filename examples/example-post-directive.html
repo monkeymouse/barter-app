@@ -5,6 +5,7 @@
 		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 		<script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore-min.js"></script>
 		<script src="//cdnjs.cloudflare.com/ajax/libs/async/0.2.7/async.min.js"></script>
+		<script src="//cdnjs.cloudflare.com/ajax/libs/string.js/1.2.0/string.min.js"></script>
 		<title>
 			{block:PostSummary}{PostSummary} - {/block:PostSummary}{Title}
 		</title>
@@ -23,7 +24,7 @@
 					$scope.$watch( "postList",
 						function( ){
 							console.debug( "CONTENT-CONTROLLER: ", $scope );
-							$scope.aggregatePostList = _.values( $scope.postList );
+							$scope.aggregatePostList = _.flatten( _.values( $scope.postList ) );
 						} );
 					$scope.$watch( "aggregatePostList",
 						function( ){
@@ -46,6 +47,10 @@
 						function( component ){
 							return "post-" + component;
 						} );
+					var formattedComponents = _.map( components,
+						function( component ){
+							return S( component ).camelize( );
+						} );
 					var postElement = $( element );
 					if( postElement.html( ).replace( /\s+/, "" ) ){
 						var postData = { };
@@ -55,7 +60,7 @@
 								var componentType = this.nodeName.toLowerCase( ).replace( "post-", "" );
 								parser( postComponent, componentType,
 									function( componentData ){
-										_.extend( postData, _.pick( componentData, components ) );
+										_.extend( postData, _.pick( componentData, formattedComponents ) );
 									} );
 							} );
 						//Initialize the page index of the post list if not yet updated.
@@ -166,12 +171,11 @@
 								var componentData = { };
 								switch( componentType ){
 									case "image-url":
-										componentData.imageURL = {}; 
+										componentData.imageUrl = {}; 
 										postComponent.find("image-url").each(function(){
 											var imageURL = $(this);
-											componentData.imageURL[imageURL.attr("type")] = imageURL.html().trim();
+											componentData.imageUrl[imageURL.attr("type")] = imageURL.html().trim();
 										});
-										console.debug(componentData.imageURL);
 										break;
 										
 									case "caption":

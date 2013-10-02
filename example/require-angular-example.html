@@ -7,26 +7,20 @@
 		<script src="//cdnjs.cloudflare.com/ajax/libs/async/0.2.7/async.min.js"></script>
 		<script src="//cdnjs.cloudflare.com/ajax/libs/string.js/1.2.0/string.min.js"></script-->
 
-		<script src="//cdnjs.cloudflare.com/ajax/libs/require.js/2.1.8/require.min.js" 
-			data-main="./barter.js">
+		<script src="//cdnjs.cloudflare.com/ajax/libs/require.js/2.1.8/require.min.js"></script>
+		<script>
+			require.config( {
+				"baseUrl": "../",
+				"paths": {
+					
+				}
+			} );
 		</script>
+
 		<title barter-title>
 		</title>
 	</head>
-	<body ng-app="barter">
-		<!--
-			This will verify the site.
-		-->
-		<barter-app
-			access-key=""
-			email="barter@gmail.com"
-			site-url="barter.tumblr.com"
-			site-name="barter"
-			ng-controller="BarterController">
-		</barter-app>
-		<tumblr-parser
-			ng-controller="BarterController">
-			
-		</tumblr-parser>
+	<body ng-app="test">
+		
 	</body>
 </html>

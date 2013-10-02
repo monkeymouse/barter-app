@@ -1,0 +1,39 @@
+{
+	"PACKAGING_VARIABLES": {
+		"baseUrl": "./",
+		"paths": {
+			"jquery": [
+			],
+			"angular": [
+			],
+			"bootstrap": [
+			],
+			"async": [
+			],
+			"less": [
+			],
+			"string": [
+			],
+			"underscore": [
+			],
+			
+			"barterModule": "js/app/barter-app",
+			"barterAppDirective": "js/directive/barter-app-directive",
+			"barterAppController": "js/controller/barter-app-controller",
+			
+			"tumblrParserDirective": "js/directive/tumblr-parser-directive",
+			"tumblrParserController": "js/controller/tumblr-parser-controller",
+
+			"barterShellDirective": "",
+			"barterShellController": "",
+			
+			"barterHeaderDirective": "",
+			"barterHeaderController": "",
+
+			"barterBodyDirective": "",
+			"barterBodyController": ""
+
+
+		}
+	}
+}

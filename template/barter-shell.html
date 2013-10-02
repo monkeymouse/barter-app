@@ -1,12 +1,17 @@
-<barter-shell>
-	<barter-header ng-controller="HeaderController">
+<barter-shell 
+	ng-controller="BarterShellController">
+	<barter-header 
+		ng-controller="BarterHeaderController">
 	</barter-header>
 	<barter-body>
-		<barter-content ng-controller="ContentController">	
+		<barter-content
+			ng-controller="BarterContentController">	
 		</barter-content>
-		<barter-function ng-controller="FunctionController">	
+		<barter-function
+			ng-controller="BarterFunctionController">	
 		</barter-function>
 	</barter-body>
-	<barter-footer ng-controller="FooterController">
+	<barter-footer
+		ng-controller="BarterFooterController">
 	</barter-footer>
 </barter-shell>

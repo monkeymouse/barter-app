@@ -404,6 +404,14 @@
 	<body>
 		<barter ng-app="barter">
 			<barter-content ng-controller="ContentController">
+
+			<div ng-repeat="post in aggregatePostList">
+
+				{{post.type}}
+
+
+			</div>
+
 				<post post-list="postList">
 					{block:Posts}
 						<!--

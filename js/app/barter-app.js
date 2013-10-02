@@ -1,1 +1,5 @@
-var barter = angular.module( "barter", [ ] );
+define( [ "angular" ],
+	function( ){
+		var barterModule = angular.module( "barter", [ ] );
+		return barterModule;
+	} );

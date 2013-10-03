@@ -15,6 +15,7 @@ require( [ "barter-data" ],
 		require( [
 				"angular",
 				"barterModule",
+				"controllerWrap",
 				"barterAppDirective",
 				"barterAppController",
 				"tumblrParserDirective",

@@ -35,6 +35,8 @@ var barterData = {
 			],
 
 			"barterModule": "js/app/barter-app",
+
+			"controllerWrap": "js/util/controller-wrap-factory",
 			
 			"barterAppDirective": "js/directive/barter-app-directive",
 			"barterAppController": "js/controller/barter-app-controller",

@@ -1,0 +1,603 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.0.7/angular.min.js"></script>
+		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+		<script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore-min.js"></script>
+		<script src="//cdnjs.cloudflare.com/ajax/libs/async/0.2.7/async.min.js"></script>
+		<script src="//cdnjs.cloudflare.com/ajax/libs/string.js/1.2.0/string.min.js"></script>
+		
+		<title>
+			{block:PostSummary}{PostSummary} - {/block:PostSummary}{Title}		
+		</title>
+		<script>
+			function encode( data ) {
+				return window.btoa( unescape( encodeURIComponent( data ) ) );
+			}
+
+			function decode( data ) {
+				return decodeURIComponent( escape( window.atob( data ) ) );
+			}
+
+			function isIFrame( ){
+				console.debug( "LOCAL HREF: ", window.location.href );
+				console.debug( "PARENT HREF: ", window.parent.location.href );
+				return ( window.location.href != window.parent.location.href );
+			}
+
+			var barter = angular.module( "barter", [ ] );
+			
+			barter.factory( "extractPost",
+				function( parsePost, transformPost ){
+					return function extractPost( data, callback ){
+						var element = data.element;
+						if( !( element instanceof jQuery ) ){
+							element = $( element );
+							data.element = element;
+						}
+						async.parallel( [
+								function( callback ){
+									parsePost( data, function( postData ){
+										callback( null, postData );
+									} );
+								}/*,
+								function( callback ){
+									transformPost( data, function( postData ){
+										callback( null, postData );
+									} );
+								}*///TODO: Uncomment this if transformPost is done!
+							],
+							function( error, postData ){
+								data = { };
+								postData.each( function( postData ){
+									_.extend( data, postData );
+								} );
+								callback( data );
+								setTimeout( function( ){
+									//Once we get the data, remove the post because we will override
+									//  it with our default view.
+									element.remove( );
+								}, 0 );
+							} );
+					};
+				} );
+
+			//There are customizations to the post, this will transform the post so
+			//	that customizations can be handled properly.
+			barter.factory( "transformPost",
+				function( ){
+					return function transformPost( data , callback ){
+
+					};
+				} );
+
+			//This will read the post data and assign the registered components to it.
+			barter.factory( "parsePost",
+				function( ){
+					return function parsePost( data, callback ){
+						var element = data.element;
+						if( !( element instanceof jQuery ) ){
+							element = $( element );
+							data.element = element;
+						}
+						var type = data.type;
+						var components = data.components;
+						var parser = data.parser;
+						var postComponents = _.map( components,
+							function( component ){
+								return "post-" + component;
+							} );
+						var formattedComponents = _.map( components,
+							function( component ){
+								return S( component ).camelize( );
+							} );
+						if( element.html( ).replace( /\s+/, "" ) ){
+							var postData = { };
+							element.find( postComponents.toString( ) )
+								.each( function( ){
+									var postComponent = $( this );
+									var componentType = this.nodeName.toLowerCase( ).replace( "post-", "" );
+									parser( postComponent, componentType,
+										function( componentData ){
+											_.extend( postData, _.pick( componentData, formattedComponents ) );
+										} );
+								} );
+							postData.type = type;
+							callback( postData );
+						}
+					};
+				} );
+
+			barter.factory( "registerWatcher",	
+				function( ){
+					return function registerWatcher( type, pusher ){
+						barter.config( function( dataManagerProvider ){
+							dataManagerProvider.registerWatcher( type, watcher );
+						} );
+					};
+				} );
+
+			barter.factory( "registerPusher",	
+				function( ){
+					return function registerPusher( type, pusher ){
+						barter.config( function( dataManagerProvider ){
+							dataManagerProvider.registerPusher( type, pusher );
+						} );
+					};
+				} );
+
+			barter.provider( "dataManager",
+				function( ){
+					var watcherList = { };
+					var pusherList = { };
+
+					this.registerWatcher = function registerWatcher( type, watcher ){
+						if( !( type in watcherList ) ){
+							watcherList[ type ] = [ watcher ];
+						}else{
+							watcherList[ type ].push( watcher );
+						}
+					};
+
+					this.registerPusher = function registerPusher( type, pusher ){
+						if( !( type in pusherList ) ){
+							pusherList[ type ] = pusher;	
+						}
+					};
+
+					this.$get = function( ){
+						return {
+							"updateData": function( type, data, callback ){
+								async.each( watcherList[ type ],
+									function( watcher, callback ){
+										if( typeof watcher == "function" ){
+											watcher( data );	
+										}
+										callback( );
+									},
+									function( ){
+										//This callback is optional.
+										if( typeof callback == "function" ){
+											callback( );	
+										}
+									} );
+							},
+							"getPusher": function( type ){
+								return pusherList[ type ];
+							}
+						};
+					};
+				} );
+
+			barter.directive( "posts",
+				function( dataManager, registerPusher ){
+					return {
+						"restrict": "E",
+						"scope": {
+							"postList": "=",
+							"currentPageNumber": "="
+						},
+						"link": function( scope, element ){
+							scope.postList = [ ];
+							registerPusher( "postList",
+								function( data ){
+									scope.postList[ scope.currentPageNumber ] = data;
+								} );
+							scope.$watch( "postList",
+								function( ){
+									dataManager.updateData( "postList", scope.postList );
+								} );
+						}
+					};
+				} );
+
+			
+
+			barter.directive( "postText", 
+				function( extractPost, dataManager ){
+					return {
+						//The restrict is used to assign the directive to the tag name for E.
+						"restrict": "E",
+						//The scope is used to bind data from the element to the ng scope.
+						//The = here is used to bind bidirectional data binding. It means
+						//A change in the element and parent scope( controller ) will affect a change
+						//  in the local scope ( directive ) and vice versa
+						"scope": {
+							"postList": "=",
+							"currentPageNumber": "="
+						},
+						//This is used to manipulate the scope, element and attributes where
+						//  the directive is assigned. This includes the contents of the element.
+						"link": function( scope, element ){
+							extractPost( {
+								"type": "text",
+								"element": element,
+								"components": [ "title", "body", "date", "like-count", "tags" ],
+								"parser": function parser( postComponent, componentType, callback ){
+									//Read the content elements of this post.
+									//This will match what you put on the body.
+									//Extract every data from each element.
+									//postComponent is a jQuery object.
+									var componentData = { };
+									switch( componentType ){
+										case "title":
+											componentData.title = postComponent.html( ).trim( );
+											break;
+											
+										case "body":
+											componentData.body = postComponent.html( ).trim( );
+											break;
+											
+										case "date":
+											componentData.date = new Date( Date( parseInt( postComponent.html( ).trim( ) ) ) );
+											break;
+											
+										case "like-count":
+											var likeCount = parseInt( postComponent.html( ).trim( ) );
+											if( likeCount ){
+												componentData.likeCount = likeCount;	
+											}
+											break;
+											
+										case "tags":
+											componentData.tags = [ ];
+											postComponent.find( "tag" )
+												.each( function( ){
+													var tag = $( this ).html( ).trim( );
+													if( tag ){
+														componentData.tags.push( tag );	
+													}											  
+												} );
+									}
+									//Return back your parsed data.
+									callback( componentData );
+								}
+							},
+							dataManager.getPusher( "postList" ) );
+						}
+					}
+				} );
+
+			barter.controller( "ContentController",
+				function( $scope ){
+					$scope.postList = [ ];
+					$scope.aggregatePostList = [ ];
+					$scope.viewablePostList = [ ];
+					$scope.nextPostList = [ ];
+					$scope.previousPostList = [ ];
+
+					$scope.currentPageNumber = 1;
+					$scope.previousPageNumber = 1;
+					$scope.nextPageNumber = 2;
+					$scope.pageLimit = 15;
+
+					$scope.nextPage = function nextPage( ){
+						console.log( "Content controller next page." );
+					};
+
+					$scope.previousPage = function previousPage( ){
+						console.log( "Content controller previous page." );
+					};
+
+					$scope.$watch( "postList",
+						function( newValue ){
+							console.debug( "POST-LIST $watch!", newValue );
+							if( _.isEmpty( newValue ) ){
+								return;
+							}
+							if( isIFrame( ) ){
+								console.debug( "IFRAME-CONTENT-CONTROLLER: ", $scope.postList );
+								var location = 	window.location.href.match( /(?:#page-)(\w+?)$/ )[ 1 ];
+								console.debug( "IFRAME LOCATION: ", location );
+								var postList = _.flatten( _.values( $scope.postList ) );
+								switch( location ){
+									case "next":
+										var data = encode( JSON.stringify( postList ) );
+										$( window.parent.document ).contents( )
+											.find( "pagination" ).attr( "next-post-list-update", data );
+										break;
+
+									case "previous":
+										var data = encode( JSON.stringify( postList ) );
+										$( window.parent.document ).contents( )
+											.find( "pagination" ).attr( "previous-post-list-update", data );
+								}
+							}else{
+								console.debug( "CONTENT-CONTROLLER: ", $scope.postList );
+								$scope.aggregatePostList = _.flatten( $scope.postList );	
+							}
+						} );
+
+					$scope.$watch( "aggregatePostList",
+						function( newValue ){
+							console.debug( "AGGREGATE-POST-LIST $watch!", newValue );
+							//This should not execute in the iframe.
+							if( !isIFrame( ) ){
+								$scope.viewablePostList = $scope.aggregatePostList.slice( 0, $scope.pageLimit );
+								console.debug( "AGGREGATE-POST-LIST: ", $scope.aggregatePostList );
+								console.debug( "VIEWABLE-POST-LIST: ", $scope.viewablePostList );	
+							}
+						} );
+
+					$scope.$watch( "nextPostList",
+						function( newValue ){
+							if( !isIFrame( ) ){
+								if( !_.isEmpty( newValue ) ){
+									console.debug( "NEXT-POST-LIST: ", $scope.nextPostList );
+									$scope.postList[ $scope.nextPageNumber ] = $scope.nextPostList;
+									//$scope.$apply( );
+								}
+							}
+						} );
+
+					$scope.$watch( "previousPostList",
+						function( newValue ){
+							if( !isIFrame( ) ){
+								if( !_.isEmpty( newValue ) ){
+									console.debug( "NEXT-POST-LIST: ", $scope.previousPostList );
+									$scope.postList[ $scope.previousPageNumber ] = $scope.previousPostList;
+									//$scope.$apply( );
+								}
+							}
+						} );
+				} );
+
+			barter.directive( "nextPage",
+				function( ){
+					return {
+						"restrict": "E",
+						"scope": {
+							"nextPageNumber": "=",
+							"nextPage": "="
+						},
+						"link": function( scope, element ){
+							//Checks if we are inside an iframe.
+							if( isIFrame( ) ){
+								return;
+							}
+
+							$( element ).click( function( ){
+								scope.nextPage( );
+							} );
+
+							var pagination = $( "pagination" );
+							scope.$watch( "nextPageNumber",
+								function( newValue ){
+									if( newValue ){
+										var iframe = $( "<iframe></iframe>" )
+											.attr( {
+												"src": "/page/" + scope.nextPageNumber + "#page-next"
+											} )
+											.hide( );
+										pagination.append( iframe );
+									}
+								} );
+						}
+					};
+				} );
+
+			barter.directive( "previousPage",
+				function( ){
+					return {
+						"restrict": "E",
+						"scope": {
+							"previousPageNumber": "=",
+							"previousPage": "="
+						},
+						"link": function( scope, element ){
+							if( isIFrame( ) ){
+								return;
+							}
+
+							$( element ).click( function( ){
+								scope.previousPage( );
+							} );
+
+							var pagination = $( "pagination" );
+							scope.$watch( "previousPageNumber",
+								function( newValue ){
+									if( newValue ){
+										var iframe = $( "<iframe></iframe>" )
+											.attr( {
+												"src": "/page/" + scope.previousPageNumber + "#page-previous"
+											} )
+											.hide( );
+										pagination.append( iframe );
+									}
+								} );
+						}
+					};
+				} );
+
+			barter.directive( "pagination", 
+				function( ){
+					return {
+						"restrict": "E",
+						"scope": {
+							"postList": "=",
+							"totalPageCount": "=",
+							"currentPageNumber": "=",
+							"nextPageNumber": "=",
+							"previousPageNumber": "=",
+							"pageLimit": "=",
+							"nextPage": "=",
+							"previousPage": "=",
+							"nextPostList": "=",
+							"previousPostList": "=",
+							"nextPostListUpdate": "@",
+							"previousPostListUpdate": "@"
+						},
+						"link": function( scope, element ){
+							if( isIFrame( ) ){
+								return;
+							}
+
+							console.debug( "PAGINATION: ", scope );
+
+							var pagination = $( element );
+
+							scope.nextPage = function nextPage( ){
+								scope.currentPageNumber++;
+								scope.nextPageNumber++;
+								scope.previousPageNumber++;
+
+								if( scope.currentPageNumber > scope.totalPageCount ){
+									scope.currentPageNumber = 1;
+								}
+								if( scope.nextPageNumber > scope.totalPageCount ){
+									scope.nextPageNumber = 1;
+								}
+								if( scope.previousPageNumber > scope.totalPageCount ){
+									scope.previousPageNumber = 1;
+								}
+								scope.$apply( );
+							};
+
+							scope.previousPage = function previousPage( ){
+								scope.currentPageNumber--;
+								scope.nextPageNumber--;
+								scope.previousPageNumber--;
+
+								if( scope.currentPageNumber < 1 ){
+									scope.currentPageNumber = scope.totalPageCount;
+								}
+								if( scope.nextPageNumber < 1 ){
+									scope.nextPageNumber = scope.totalPageCount;
+								}
+								if( scope.previousPageNumber < 1 ){
+									scope.previousPageNumber = scope.totalPageCount;
+								}
+								scope.$apply( );
+							};
+
+							scope.$watch( "nextPostListUpdate",
+								function( ){
+									var data = decode( scope.nextPostListUpdate );
+									if( data ){
+										scope.nextPostList = JSON.parse( data );
+										pagination.attr( "next-post-list-update", "" );
+										scope.$apply( );
+										console.debug( "UPDATED-NEXT-POST-LIST: ", scope.nextPostList );
+									}
+								} );
+
+							scope.$watch( "previousPostListUpdate",
+								function( ){
+									var data = decode( scope.previousPostListUpdate );
+									if( data ){
+										scope.previousPostList = JSON.parse( data );
+										pagination.attr( "previous-post-list-update", "" );
+										scope.$apply( );
+										console.debug( "UPDATED-PREVIOUS-POST-LIST: ", scope.previousPostList );
+									}
+								} );
+
+							//This will force the next and previous post list to be updated.
+							var currentNextPostListUpdate = scope.nextPostListUpdate;
+							var currentPreviousPostListUpdate = scope.previousPostListUpdate;
+							var listenUpdate = function listenUpdate( ){
+								if( pagination.attr( "next-post-list-update" ) != currentNextPostListUpdate
+									|| pagination.attr( "previous-post-list-update" ) != currentPreviousPostListUpdate )
+								{
+									scope.nextPostListUpdate = pagination.attr( "next-post-list-update" );
+									scope.previousPostListUpdate = pagination.attr( "previous-post-list-update" );
+									currentNextPostListUpdate = scope.nextPostListUpdate;
+									currentPreviousPostListUpdate = scope.previousPostListUpdate;
+									scope.$apply( );
+								}
+							};
+							setInterval( listenUpdate, 100 );
+						}
+					};
+				} );
+		</script>
+	</head>
+	<body>
+		<barter ng-app="barter">
+			<barter-content ng-controller="ContentController">
+				
+
+				{block:Posts}
+					<posts 
+						post-list="postList"
+						current-page-number="currentPageNumber">
+						<!--
+							Using angular directive, "post-text" tag name will be
+								trnasformed into "postText" camel case format.
+
+							So in order to create your own directive, construct a tag name,
+								Example: "post-image" 
+							Then access the element using the directive "postImage",
+								Example: barter.directive( "postImage", function( ){ } );
+						-->
+						{block:Text}
+							<post-text>
+								{block:Title}
+									<post-title>
+										{Title}
+									</post-title>
+								{/block:Title}
+								<post-body>
+									{Body}
+								</post-body>
+								{block:Date}
+									<post-date>
+										{Timestamp}
+									</post-date>
+								{/block:Date}
+								{block:NoteCount}
+									<post-like-count>
+										{NoteCount}
+									</post-like-count>
+								{/block:NoteCount}
+								{block:HasTags}
+									<post-tags>
+										{block:Tags} 
+											<tag>{Tag}</tag>
+										{/block:Tags}
+									</post-tags>
+								{/block:HasTags}
+							</post-text>
+						{/block:Text}
+					</posts>
+				{/block:Posts}
+				
+				<!--
+					Always put the pagination element at the top
+						inside the ContentController, this will make the ContentController
+						its parent scope.
+				-->
+				{block:Pagination}
+					<pagination 
+						post-list="postList" 
+						next-post-list="nextPostList"
+						previous-post-list="previousPostList"
+						total-page-count="{TotalPages}"
+						current-page-number="currentPageNumber"
+						next-page-number="nextPageNumber"
+						previous-page-number="previousPageNumber"
+						page-limit="pageLimit"
+						next-page="nextPage"
+						previous-page="previousPage"
+						next-post-list-update=""
+						previous-post-list-update="">
+					</pagination>
+				{/block:Pagination}
+
+				<!--
+					These are the controls of the paging. You can put it anywhere
+						but below the pagination element and inside the Content Controller.
+				-->
+				<next-page next-page-number="nextPageNumber" next-page="nextPage">
+					<!--You can put whatever you want inside here-->
+					<a href="#page-{{ nextPageNumber }}">Next</a>
+				</next-page>
+				<previous-page previous-page-number="previousPageNumber" previous-page="previousPage">
+					<!--You can put whatever you want inside here-->
+					<a href="#page-{{ previousPageNumber }}">Previous</a>
+				</previous-page>
+				
+			</barter-content>
+		</barter>
+	</body>
+</html>

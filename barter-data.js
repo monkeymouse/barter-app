@@ -1,6 +1,18 @@
 var barterData = {
 	"REQUIREJS_VARIABLES": {
 		"baseUrl": "./",
+		"packages": [
+			{
+				"name": "css",
+				"location": "library/require-css",
+				"main": "css"
+			},
+			{
+				"name": "less",
+				"location": "library/require-less",
+				"main": "less"
+			}
+		],
 		"paths": {
 			"jquery": [
 				"http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min",
@@ -21,10 +33,10 @@ var barterData = {
 				"http://cdnjs.cloudflare.com/ajax/libs/async/0.2.7/async.min",
 				"library/async/async"
 			],
-			"less": [
+			/*"less": [
 				"http://cdnjs.cloudflare.com/ajax/libs/less.js/1.4.1/less.min",
 				"library/less/less.min"
-			],
+			],*/
 			"string": [
 				"http://cdnjs.cloudflare.com/ajax/libs/string.js/1.2.0/string.min",
 				"library/string/string"
@@ -34,39 +46,39 @@ var barterData = {
 				"library/underscore/underscore"
 			],
 
-			"barterModule": "js/app/barter-app",
+			"barterModule": "script/app/barter-app",
 
-			"controllerWrap": "js/util/controller-wrap-factory",
-			"singularData": "js/util/singular-data-service",
-			"elementWatcher": "js/util/element-watcher-provider",
-			"safeApply": "js/util/safe-apply-factory",
+			"controllerWrap": "script/util/controller-wrap-factory",
+			"singularData": "script/util/singular-data-service",
+			"elementWatcher": "script/util/element-watcher-provider",
+			"safeApply": "script/util/safe-apply-factory",
 			
-			"barterAppDirective": "js/directive/barter-app-directive",
-			"barterAppController": "js/controller/barter-app-controller",
+			"barterAppDirective": "script/directive/barter-app-directive",
+			"barterAppController": "script/controller/barter-app-controller",
 			
-			"tumblrParserDirective": "js/directive/tumblr-parser-directive",
-			"tumblrParserController": "js/controller/tumblr-parser-controller",
+			"tumblrParserDirective": "script/directive/tumblr-parser-directive",
+			"tumblrParserController": "script/controller/tumblr-parser-controller",
 
-			"commandCenterDirective": "js/directive/command-center-directive",
-			"commandCenterController": "js/controller/command-center-controller",
+			"commandCenterDirective": "script/directive/command-center-directive",
+			"commandCenterController": "script/controller/command-center-controller",
 
-			"barterShellDirective": "js/directive/barter-shell-directive",
-			"barterShellController": "js/controller/barter-shell-controller",
+			"barterShellDirective": "script/directive/barter-shell-directive",
+			"barterShellController": "script/controller/barter-shell-controller",
 			
-			"barterHeaderDirective": "js/directive/barter-header-directive",
-			"barterHeaderController": "js/controller/barter-header-controller",
+			"barterHeaderDirective": "script/directive/barter-header-directive",
+			"barterHeaderController": "script/controller/barter-header-controller",
 
-			"barterBodyDirective": "js/directive/barter-body-directive",
-			"barterBodyController": "js/controller/barter-body-controller",
+			"barterBodyDirective": "script/directive/barter-body-directive",
+			"barterBodyController": "script/controller/barter-body-controller",
 
-			"barterFooterDirective": "js/directive/barter-footer-directive",
-			"barterFooterController": "js/controller/barter-footer-controller",
+			"barterFooterDirective": "script/directive/barter-footer-directive",
+			"barterFooterController": "script/controller/barter-footer-controller",
 
-			"barterContentDirective": "js/directive/barter-content-directive",
-			"barterContentController": "js/controller/barter-content-controller",
+			"barterContentDirective": "script/directive/barter-content-directive",
+			"barterContentController": "script/controller/barter-content-controller",
 
-			"barterFunctionDirective": "js/directive/barter-function-directive",
-			"barterFunctionController": "js/controller/barter-function-controller"
+			"barterFunctionDirective": "script/directive/barter-function-directive",
+			"barterFunctionController": "script/controller/barter-function-controller"
 		}
 	}
 };

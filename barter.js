@@ -10,6 +10,11 @@ require( [ "barter-data" ],
 	function( barterData ){
 		require.config( barterData.REQUIREJS_VARIABLES );
 
+		require( [ "less!style/sample.less" ],
+			function( ){
+
+			} );
+
 		require( [
 				"angular",
 

@@ -8,18 +8,24 @@ require.config( {
 
 require( [ "barter-data" ],
 	function( barterData ){
-		console.debug( "Inside require: ", barterData );
-
 		require.config( barterData.REQUIREJS_VARIABLES );
 
 		require( [
 				"angular",
+
 				"barterModule",
+
 				"controllerWrap",
+				"safeApply",
+				"singularData",
+				"elementWatcher",
+				
 				"barterAppDirective",
 				"barterAppController",
+				
 				"tumblrParserDirective",
 				"tumblrParserController",
+				
 				"commandCenterDirective",
 				"commandCenterController"
 			],

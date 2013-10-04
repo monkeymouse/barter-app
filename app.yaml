@@ -5,5 +5,22 @@ api_version: 1
 threadsafe: true
 
 handlers:
-- url: /.*
-  script: helloworld.application
+- url: /script/(.*\.js)
+  mime_type: text/javascript
+  static_files: script/\1
+  upload: script/(.*\.js)
+
+- url: /library/(.*\.(?:js|css))
+  static_files: library/\1
+  upload: library/(.*\.(?:js|css))
+
+- url: /style/(.*\.(?:less|css))
+  static_files: style/\1
+  upload: style/(.*\.(?:less|css))
+
+- url: /(barter.*)
+  static_files: main/\1
+  upload: main/(barter.*)
+
+
+

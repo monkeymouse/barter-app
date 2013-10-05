@@ -57,6 +57,13 @@ define( [ "barterModule", "jquery", "underscore", "singularData" ],
 							if( id in elementList ){
 								if( parsers ){
 									elementList[ id ].parsers = parsers;
+									if( typeof options == "object" ){
+										if( "callback" in options
+											&& typeof options.callback == "function" )
+										{
+											options.callback( );
+										}
+									}
 									return;
 								}
 								console.debug( "Cannot register element watcher, ID already exists! ID: ", id );
@@ -105,17 +112,23 @@ define( [ "barterModule", "jquery", "underscore", "singularData" ],
 											return;
 										}
 										elementContent = newValue;
-
+										console.debug( elementContent );
 										var changeList = { };
-										var changes = _.chain( elementContent.split( ";" ) )
+										var contents = _.compact( elementContent.split( ";" ) );
+										var changes = _.chain( contents )
 											.map( function( changeContent ){
 												if( ( /^[^:]+?:[^:]+?$/ ).test( changeContent ) ){
 													var contentData = changeContent.split( ":" );
 													var contentType = contentData[ 0 ];
-													var content = contentData[ 1 ];
-													changeList[ contentType ] = $( "<content>" 
-															+ singularData.decode( content ) 
-														+ "</content>" );
+													var content = singularData.decode( contentData[ 1 ] );
+													if( ( /\[null\]|\[false\]/ ).test( content ) ){
+														content = eval( content.replace( /\[|\]/, "" ) );
+													}else if( ( /^\d+$/ ).test( content ) ){
+														content = eval( content );
+													}else if( ( /(\<\/?[^\<\>]+\>)+/ ).test( content ) ){
+														content = $( "<content>" + content + "</content>" );
+													}
+													changeList[ contentType ] = content;
 													return contentType;
 												}else{
 													changeList[ "element" ] = $( "<content>" 
@@ -126,8 +139,7 @@ define( [ "barterModule", "jquery", "underscore", "singularData" ],
 											.compact( )
 											.value( );
 
-										console.debug( "Change list: ", changeList );
-										console.debug( "Changes: ", changes );
+										console.debug( "changeList: ", changeList );
 
 										//Either use the override listener or use the $on.
 										if( typeof options == "object" ){
@@ -142,13 +154,13 @@ define( [ "barterModule", "jquery", "underscore", "singularData" ],
 										if( !_.isEmpty( changes ) ){
 											_.each( changes,
 												function( changeType ){
-													scope.$emit( "dom-change:" + change,
+													scope.$emit( "dom-change:" + changeType,
 														changeList[ changeType ] );
 												} );
 										}
 										
 										//Now they can listen for this!
-										scope.$emit( "dom-change", changeList[ element ] );
+										scope.$emit( "dom-change", changeList[ "element" ] );
 									} );
 							};
 

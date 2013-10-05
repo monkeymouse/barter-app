@@ -52,8 +52,8 @@ var barterData = {
 			"singularData": "script/util/singular-data-service",
 			"elementWatcher": "script/util/element-watcher-provider",
 			"safeApply": "script/util/safe-apply-factory",
-			"elementProperyWatcher": "script/util/element-property-watcher-factory",
-			"inspectElement": "script/util/inspect-element-factory"
+			"elementPropertyWatcher": "script/util/element-property-watcher-factory",
+			"inspectElement": "script/util/inspect-element-factory",
 			
 			"barterAppDirective": "script/directive/barter-app-directive",
 			"barterAppController": "script/controller/barter-app-controller",

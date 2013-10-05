@@ -8,79 +8,142 @@ define( [ "barterModule", "jquery", "underscore" ],
 						throw new Error( "cannot register element property watcher, element cannot be retrieved" );
 					}
 
-					var scope;
+					var scopeType;
 					if( properties instanceof Array
 						&& "scope" in properties )
 					{
-						scope = properties.scope;
+						scopeType = properties.scope;
 					}
-					//Note that this will return a function that you can update.
-					properties = inspectElement( scope.element, properties, scope );
 
-					var parsers = _.map( properties,
-						function( property ){
-							return function parser( scope ){
-								//Save the property name as property type.
-								//	because this will be overriden. 
-								propertyType = property;
+					//Save the properties this will be used by the boot parser.
+					var propertyList = properties;
 
-								//Let's try to update :D
-								var propertyData = properties( )[ property ];
+					var parsers;
+					var bootParser = function bootParser( scope, property ){
+						//Note that this will return a function that you can update.
+						if( property !== undefined ){
+							properties = [ property ];
+						}
 
-								//Property data can be an object containing attribute and property 
-								//	or any data taken from inspecting.
-								if( typeof propertyData == "object" 
-									&& "attribute" in propertyData
-									&& "property" in propertyData )
-								{
-									var attribute = propertyData.attribute;
-									var property;
-									try{
-										property = $( propertyData.property );
-										if( _.isEmpty( property ) ){
-											property = propertyData.property;
-										}else{
-											property = property.clone( )
-												.wrap( "<content></content>" ).parent( ).html( );
+						var updateProperties = inspectElement( scope.element, properties, scopeType );
+						var propertyList = updateProperties( ); 
+						parsers = _.map( propertyList,
+							function( x, index ){
+								return function parser( scope ){
+									//Let's try to update :D
+									propertyList = updateProperties( );
+									var propertyData = propertyList[ index ];
+									var propertyType = propertyData.name;
+									var propertyData = propertyList[ propertyType ];
+
+									console.debug( "propertyData: ", propertyData );
+									if( propertyData === undefined ){
+										return;
+									}
+
+									//Property data can be an object containing attribute and property 
+									//	or any data taken from inspecting.
+									if( typeof propertyData == "object" 
+										&& "attribute" in propertyData
+										&& "property" in propertyData )
+									{
+										var attribute = propertyData.attribute;
+										if( attribute === false ){
+											attribute = "[false]";
+										}else if( attribute === null ){
+											attribute = "[null]";
 										}
-									}catch( exception ){
-										property = $( "<content>" 
-												+ propertyData.property 
-											+ "</content>" ).html( );
-									}
-									propertyData = {
-										"attribute": attribute,
-										"property": property
-									};
-									propertyData = propertyType + ":" 
-										+ singularData.encode( JSON.stringify( propertyData ) ) + ";";
-								}else{
-									var property;
-									try{
-										property = $( propertyData );
-										if( _.isEmpty( property ) ){
-											property = propertyData;
+
+										var property = propertyData.property;
+										if( property === null ){
+											property = "[null]";
 										}else{
-											property = property.clone( )
-												.wrap( "<content></content>" ).parent( ).html( );
+											try{
+												property = $( propertyData.property );
+												if( _.isEmpty( property ) ){
+													property = propertyData.property;
+												}else{
+													property = property.clone( )
+														.wrap( "<content></content>" ).parent( ).html( );
+												}
+											}catch( exception ){
+												property = $( "<content>" 
+														+ propertyData.property 
+													+ "</content>" ).html( );
+											}	
 										}
-									}catch( exception ){
-										property = $( "<content>" 
-												+ propertyData.property 
-											+ "</content>" ).html( );
+
+										
+										propertyData = {
+											"attribute": attribute,
+											"property": property
+										};
+										propertyData = propertyType + ":" 
+											+ singularData.encode( JSON.stringify( propertyData ) ) + ";";
+									}else{
+										if( propertyData === false ){
+											propertyData = "[false]";
+										}
+										if( propertyData === null ){
+											propertyData = "[null]";
+										}
+										var property;
+										try{
+											property = $( propertyData );
+											if( _.isEmpty( property ) ){
+												property = propertyData;
+											}else{
+												property = property.clone( )
+													.wrap( "<content></content>" ).parent( ).html( );
+											}
+										}catch( exception ){
+											property = $( "<content>" 
+													+ propertyData.property 
+												+ "</content>" ).html( );
+										}
+										propertyData = property;
+										propertyData = propertyType + ":" 
+											+ singularData.encode( propertyData ) + ";";
 									}
-									propertyData = property;
-									propertyData = propertyType + ":" 
-										+ singularData.encode( propertyData ) + ";";
-								}
-								if( scope !== undefined ){
-									if( "elementContent" in scope ){
-										scope.elementContent += propertyData;
+									if( scope !== undefined ){
+										if( "elementContent" in scope ){
+											scope.elementContent += propertyData;
+										}
 									}
+									return propertyData;
+								};
+							} );
+
+						if( !_.isEmpty( parsers ) && property === undefined ){
+							return parsers;
+						}else if( !_.isEmpty( parsers ) && property !== undefined ){
+							_.each( parsers,
+								function( parser ){
+									parser( scope );
+								} );
+						}
+					};
+
+					//The attribute might be there so initialize already.
+					parsers = bootParser( scope );
+
+					/*
+						Issue: when the inspector discovers no property of that kind,
+							it will not create a parser. And nothing will be parsed.
+
+						Create a boot parser that will parse + check and return whatever
+							the parser parses.
+
+						Only create a boot parser if there are no parsers.
+					*/
+					if( _.isEmpty( parsers ) ){
+						parsers = _.map( propertyList,
+							function( property ){
+								return function parser( scope ){
+									bootParser( scope, property );
 								}
-								return propertyData;
-							};
-						} );
+							} );
+					}
 
 					options.parsers = parsers;
 					elementWatcher.registerElement( id, scope, options );

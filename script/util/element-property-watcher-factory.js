@@ -53,15 +53,41 @@ define( [ "barterModule", "jquery", "underscore" ],
 										}else if( attribute === null ){
 											attribute = "[null]";
 										}
-
 										var property = propertyData.property;
 										if( property === null ){
 											property = "[null]";
 										}else{
 											try{
-												property = $( propertyData.property );
+												property = $( property );
 												if( _.isEmpty( property ) ){
-													property = propertyData.property;
+													property = property;
+												}else{
+													property = property.clone( )
+														.wrap( "<content></content>" ).parent( ).html( );
+												}
+											}catch( exception ){
+												property = $( "<content>" 
+														+ property + "</content>" ).html( );
+											}	
+										}
+										propertyData = {
+											"attribute": attribute,
+											"property": property
+										};
+										propertyData = propertyType + ":" 
+											+ singularData.encode( JSON.stringify( propertyData ) ) + ";";
+
+									}else{
+										if( propertyData === false ){
+											propertyData = "[false]";
+										}else if( propertyData === null ){
+											propertyData = "[null]";
+										}else{
+											var property;
+											try{
+												property = $( propertyData );
+												if( _.isEmpty( property ) ){
+													property = propertyData;
 												}else{
 													property = property.clone( )
 														.wrap( "<content></content>" ).parent( ).html( );
@@ -70,46 +96,19 @@ define( [ "barterModule", "jquery", "underscore" ],
 												property = $( "<content>" 
 														+ propertyData.property 
 													+ "</content>" ).html( );
-											}	
-										}
-
-										
-										propertyData = {
-											"attribute": attribute,
-											"property": property
-										};
-										propertyData = propertyType + ":" 
-											+ singularData.encode( JSON.stringify( propertyData ) ) + ";";
-									}else{
-										if( propertyData === false ){
-											propertyData = "[false]";
-										}
-										if( propertyData === null ){
-											propertyData = "[null]";
-										}
-										var property;
-										try{
-											property = $( propertyData );
-											if( _.isEmpty( property ) ){
-												property = propertyData;
-											}else{
-												property = property.clone( )
-													.wrap( "<content></content>" ).parent( ).html( );
 											}
-										}catch( exception ){
-											property = $( "<content>" 
-													+ propertyData.property 
-												+ "</content>" ).html( );
+											propertyData = property;	
 										}
-										propertyData = property;
 										propertyData = propertyType + ":" 
 											+ singularData.encode( propertyData ) + ";";
 									}
+
 									if( scope !== undefined ){
 										if( "elementContent" in scope ){
 											scope.elementContent += propertyData;
 										}
 									}
+									
 									return propertyData;
 								};
 							} );

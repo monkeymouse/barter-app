@@ -20,9 +20,12 @@ define( [ "barterModule", "jquery", "underscore" ],
 					var parsers = _.map( properties,
 						function( property ){
 							return function parser( ){
-
-							}
-						} )
+								var propertyData = properties( )[ property ];
+								if( typeof propertyData == "object" ){
+									
+								}
+							};
+						} );
 
 					elementWatcher.registerElement( id, scope, {
 

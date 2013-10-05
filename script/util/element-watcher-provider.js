@@ -105,10 +105,13 @@ define( [ "barterModule", "jquery", "underscore", "singularData" ],
 										}
 										elementContent = newValue;
 
+										var changeList = { };
 										var changes = _.chain( elementContent.split( ";" ) )
 											.map( function( changeContent ){
 												if( ( /^[^:]+?:[^:]+?$/ ).test( changeContent ) ){
 													return changeContent.split( ":" )[ 0 ];
+												}else{
+													changeList[ "element" ] = $( singularData.decode( changeContent ) );
 												}
 											} )
 											.compact( )
@@ -132,7 +135,7 @@ define( [ "barterModule", "jquery", "underscore", "singularData" ],
 										}
 										
 										//Now they can listen for this!
-										scope.$emit( "dom-change" );
+										scope.$emit( "dom-change", changeList[ element ] );
 									} );
 							};
 

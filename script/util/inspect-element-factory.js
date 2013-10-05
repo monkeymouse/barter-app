@@ -57,7 +57,11 @@ define( [ "barterModule", "jquery", "underscore" ],
 					};
 
 					updateElementProperties( );
-
+					/*
+						This will always return a modified inspector function.
+						Calling the inspector function will update itself with
+							the current property/attribute updates.
+					*/
 					return updateElementProperties;
 				};
 			} );

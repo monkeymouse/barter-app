@@ -96,6 +96,7 @@ define( [ "barterModule", "jquery", "underscore", "singularData" ],
 										if( !newValue && !elementContent ){
 											return;
 										}
+
 										if( newValue == elementContent 
 											|| ( typeof newValue == "string" 
 											&& typeof elementContent == "undefined" ) )
@@ -109,28 +110,40 @@ define( [ "barterModule", "jquery", "underscore", "singularData" ],
 										var changes = _.chain( elementContent.split( ";" ) )
 											.map( function( changeContent ){
 												if( ( /^[^:]+?:[^:]+?$/ ).test( changeContent ) ){
-													return changeContent.split( ":" )[ 0 ];
+													var contentData = changeContent.split( ":" );
+													var contentType = contentData[ 0 ];
+													var content = contentData[ 1 ];
+													changeList[ contentType ] = $( "<content>" 
+															+ singularData.decode( content ) 
+														+ "</content>" );
+													return contentType;
 												}else{
-													changeList[ "element" ] = $( singularData.decode( changeContent ) );
+													changeList[ "element" ] = $( "<content>" 
+															+ singularData.decode( changeContent )
+														+ "</content>" );
 												}
 											} )
 											.compact( )
 											.value( );
+
+										console.debug( "Change list: ", changeList );
+										console.debug( "Changes: ", changes );
 
 										//Either use the override listener or use the $on.
 										if( typeof options == "object" ){
 											if( "listener" in options
 												&& typeof options.listener == "function" )
 											{
-												options.listener( changes );
+												options.listener( changes, changeList );
 												return;
 											}
 										}
 
 										if( !_.isEmpty( changes ) ){
 											_.each( changes,
-												function( change ){
-													scope.$emit( "dom-change:" + change );
+												function( changeType ){
+													scope.$emit( "dom-change:" + change,
+														changeList[ changeType ] );
 												} );
 										}
 										
@@ -160,7 +173,7 @@ define( [ "barterModule", "jquery", "underscore", "singularData" ],
 								delete elementList[ id ];
 							}
 						}
-					}
+					};
 				};
 			} );
 	} );

@@ -143,11 +143,275 @@
 					}
 				}
 			} );
+			barter.directive( "postImage", function( postParser ){
+				return {
+					//The restrict is used to assign the directive to the tag name for E.
+					"restrict": "E",
+					//The scope is used to bind data from the element to the ng scope.
+					//The = here is used to bind bidirectional data binding. It means
+					//A change in the element and parent scope( controller ) will affect a change
+					//  in the local scope ( directive ) and vice versa
+					"scope": {
+						"postList": "=",
+						"currentPageNumber": "="
+					},
+					//This is used to manipulate the scope, element and attributes where
+					//  the directive is assigned. This includes the contents of the element.
+					"link": function( scope, element ){
+						postParser.parse( {
+							"type": "image",
+							"scope": scope,
+							"element": element,
+							"components": [ "image-url","caption", "date", "like-count", "tags" ],
+							"parser": function parser( postComponent, componentType, callback ){
+								//Read the content elements of this post.
+								//This will match what you put on the body.
+								//Extract every data from each element.
+								//postComponent is a jQuery object.
+								var componentData = { };
+								switch( componentType ){
+									case "image-url":
+										componentData.imageUrl = {}; 
+										postComponent.find("image-url").each(function(){
+											var imageURL = $(this);
+											componentData.imageUrl[imageURL.attr("type")] = imageURL.html().trim();
+										});
+										break;
+										
+									case "caption":
+										componentData.caption = postComponent.html( ).trim( );
+										break;
+										
+									case "date":
+										componentData.date = new Date( Date( parseInt( postComponent.html( ).trim( ) ) ) );
+										break;
+										
+									case "like-count":
+										var likeCount = parseInt( postComponent.html( ).trim( ) );
+										if( likeCount ){
+											componentData.likeCount = likeCount;	
+										}
+										break;
+										
+									case "tags":
+										componentData.tags = [ ];
+										postComponent.find( "tag" )
+											.each( function( ){
+												var tag = $( this ).html( ).trim( );
+												if( tag ){
+													componentData.tags.push( tag );	
+												}											  
+											} );
+								}
+								//Return back your parsed data.
+								callback( componentData );
+							}
+						} );
+					}
+				}
+			} );
+			barter.directive( "postQuote", function( postParser ){
+				return {
+					//The restrict is used to assign the directive to the tag name for E.
+					"restrict": "E",
+					//The scope is used to bind data from the element to the ng scope.
+					//The = here is used to bind bidirectional data binding. It means
+					//A change in the element and parent scope( controller ) will affect a change
+					//  in the local scope ( directive ) and vice versa
+					"scope": {
+						"postList": "=",
+						"currentPageNumber": "="
+					},
+					//This is used to manipulate the scope, element and attributes where
+					//  the directive is assigned. This includes the contents of the element.
+					"link": function( scope, element ){
+						postParser.parse( {
+							"type": "quote",
+							"scope": scope,
+							"element": element,
+							"components": [ "quote-line", "source", "date", "like-count", "tags" ],
+							"parser": function parser( postComponent, componentType, callback ){
+								//Read the content elements of this post.
+								//This will match what you put on the body.
+								//Extract every data from each element.
+								//postComponent is a jQuery object.
+								var componentData = { };
+								switch( componentType ){
+									case "quote-line":
+										componentData.quoteLine = postComponent.html( ).trim( );
+										break;
+										
+									case "source":
+										componentData.source = postComponent.html( ).trim( );
+										break;
+										
+									case "date":
+										componentData.date = new Date( Date( parseInt( postComponent.html( ).trim( ) ) ) );
+										break;
+										
+									case "like-count":
+										var likeCount = parseInt( postComponent.html( ).trim( ) );
+										if( likeCount ){
+											componentData.likeCount = likeCount;	
+										}
+										break;
+										
+									case "tags":
+										componentData.tags = [ ];
+										postComponent.find( "tag" )
+											.each( function( ){
+												var tag = $( this ).html( ).trim( );
+												if( tag ){
+													componentData.tags.push( tag );	
+												}											  
+											} );
+								}
+								//Return back your parsed data.
+								callback( componentData );
+							}
+						} );
+					}
+				}
+			} );
+			barter.directive( "postLink", function( postParser ){
+				return {
+					//The restrict is used to assign the directive to the tag name for E.
+					"restrict": "E",
+					//The scope is used to bind data from the element to the ng scope.
+					//The = here is used to bind bidirectional data binding. It means
+					//A change in the element and parent scope( controller ) will affect a change
+					//  in the local scope ( directive ) and vice versa
+					"scope": {
+						"postList": "=",
+						"currentPageNumber": "="
+					},
+					//This is used to manipulate the scope, element and attributes where
+					//  the directive is assigned. This includes the contents of the element.
+					"link": function( scope, element ){
+						postParser.parse( {
+							"type": "link",
+							"scope": scope,
+							"element": element,
+							"components": [ "url", "description", "date", "like-count", "tags" ],
+							"parser": function parser( postComponent, componentType, callback ){
+								//Read the content elements of this post.
+								//This will match what you put on the body.
+								//Extract every data from each element.
+								//postComponent is a jQuery object.
+								var componentData = { };
+								switch( componentType ){
+									case "url":
+										componentData.url = postComponent.html( ).trim( );
+										break;
+										
+									case "description":
+										componentData.description = postComponent.html( ).trim( );
+										break;
+										
+									case "date":
+										componentData.date = new Date( Date( parseInt( postComponent.html( ).trim( ) ) ) );
+										break;
+										
+									case "like-count":
+										var likeCount = parseInt( postComponent.html( ).trim( ) );
+										if( likeCount ){
+											componentData.likeCount = likeCount;	
+										}
+										break;
+										
+									case "tags":
+										componentData.tags = [ ];
+										postComponent.find( "tag" )
+											.each( function( ){
+												var tag = $( this ).html( ).trim( );
+												if( tag ){
+													componentData.tags.push( tag );	
+												}											  
+											} );
+								}
+								//Return back your parsed data.
+								callback( componentData );
+							}
+						} );
+					}
+				}
+			} );
+			barter.directive( "postChat", function( postParser ){
+				return {
+					//The restrict is used to assign the directive to the tag name for E.
+					"restrict": "E",
+					//The scope is used to bind data from the element to the ng scope.
+					//The = here is used to bind bidirectional data binding. It means
+					//A change in the element and parent scope( controller ) will affect a change
+					//  in the local scope ( directive ) and vice versa
+					"scope": {
+						"postList": "=",
+						"currentPageNumber": "="
+					},
+					//This is used to manipulate the scope, element and attributes where
+					//  the directive is assigned. This includes the contents of the element.
+					"link": function( scope, element ){
+						postParser.parse( {
+							"type": "chat",
+							"scope": scope,
+							"element": element,
+							"components": [ "title", "lines", "date", "like-count", "tags" ],
+							"parser": function parser( postComponent, componentType, callback ){
+								//Read the content elements of this post.
+								//This will match what you put on the body.
+								//Extract every data from each element.
+								//postComponent is a jQuery object.
+								var componentData = { };
+								switch( componentType ){
+									case "title":
+										componentData.title = postComponent.html( ).trim( );
+										break;
+										
+									case "lines":
+										componentData.lines = postComponent.html( ).trim( );
+										break;
+										
+									case "date":
+										componentData.date = new Date( Date( parseInt( postComponent.html( ).trim( ) ) ) );
+										break;
+										
+									case "like-count":
+										var likeCount = parseInt( postComponent.html( ).trim( ) );
+										if( likeCount ){
+											componentData.likeCount = likeCount;	
+										}
+										break;
+										
+									case "tags":
+										componentData.tags = [ ];
+										postComponent.find( "tag" )
+											.each( function( ){
+												var tag = $( this ).html( ).trim( );
+												if( tag ){
+													componentData.tags.push( tag );	
+												}											  
+											} );
+								}
+								//Return back your parsed data.
+								callback( componentData );
+							}
+						} );
+					}
+				}
+			} );
 		</script>
 	</head>
 	<body>
 		<barter ng-app="barter">
 			<barter-content ng-controller="ContentController">
+
+			<div ng-repeat="post in aggregatePostList">
+
+				{{post.type}}
+
+
+			</div>
+
 				<post post-list="postList">
 					{block:Posts}
 						<!--
@@ -190,6 +454,152 @@
 								</post-tags>
 							{/block:Text}
 						</post-text>
+						<post-image 
+							post-list="postList" 
+							current-page-number="currentPageNumber">
+							{block:Photo}
+								<post-image-url>
+									<image-url type="500">
+										{PhotoURL-500}
+									</image-url>
+									<image-url type="400">
+										{PhotoURL-400}
+									</image-url>
+									<image-url type="250">
+										{PhotoURL-250}
+									</image-url>
+									<image-url type="100">
+										{PhotoURL-100}
+									</image-url>
+									<image-url type="75sq">
+										{PhotoURL-75sq}
+									</image-url>
+    							</post-image-url>
+								<post-caption>
+									{block:Caption} 
+										{Caption}
+									{/block:Caption}
+								</post-caption>
+								<post-date>
+									{block:Date}
+										{Timestamp}
+									{/block:Date}
+								</post-date>
+								<post-like-count>
+									{block:NoteCount}
+										{NoteCount}
+									{/block:NoteCount}
+								</post-like-count>
+								<post-tags>
+									{block:HasTags}
+										{block:Tags} 
+											<tag>{Tag}</tag>
+										{/block:Tags}
+									{/block:HasTags}
+								</post-tags>
+							{/block:Photo}
+						</post-image>
+						<post-quote 
+							post-list="postList" 
+							current-page-number="currentPageNumber">
+							{block:Quote}
+								<post-quote-line>
+									{Quote}
+								</post-quote-line>
+								<post-source>
+									{Source}
+								</post-source>
+								<post-date>
+									{block:Date}
+										{Timestamp}
+									{/block:Date}
+								</post-date>
+								<post-like-count>
+									{block:NoteCount}
+										{NoteCount}
+									{/block:NoteCount}
+								</post-like-count>
+								<post-tags>
+									{block:HasTags}
+										{block:Tags} 
+											<tag>{Tag}</tag>
+										{/block:Tags}
+									{/block:HasTags}
+								</post-tags>
+							{/block:Quote}
+						</post-quote>
+						<post-link 
+							post-list="postList" 
+							current-page-number="currentPageNumber">
+							{block:Link}
+								<post-link-url>
+									{URL}
+								</post-link-url>
+								<post-link-name>
+									{Name}
+								</post-link-name>
+								<post-description>
+									{Description}
+								</post-description>
+								<post-date>
+									{block:Date}
+										{Timestamp}
+									{/block:Date}
+								</post-date>
+								<post-like-count>
+									{block:NoteCount}
+										{NoteCount}
+									{/block:NoteCount}
+								</post-like-count>
+								<post-tags>
+									{block:HasTags}
+										{block:Tags} 
+											<tag>{Tag}</tag>
+										{/block:Tags}
+									{/block:HasTags}
+								</post-tags>
+							{/block:Link}
+						</post-link>
+						<post-chat 
+							post-list="postList" 
+							current-page-number="currentPageNumber">
+							{block:Chat}
+								<post-title>
+									{block:Title} 
+										{Title}
+									{/block:Title}
+								</post-title>
+								<post-lines>
+									{block:Lines}
+										<line-label>
+											{block:Label}
+													{Label}
+											{/block:Label}
+										</line-label>
+									<line-message>	
+										{Line}
+									</line-message>	
+									{/block:Lines}
+								</post-lines>
+								<post-date>
+									{block:Date}
+										{Timestamp}
+									{/block:Date}
+								</post-date>
+								<post-like-count>
+									{block:NoteCount}
+										{NoteCount}
+									{/block:NoteCount}
+								</post-like-count>
+								<post-tags>
+									{block:HasTags}
+										{block:Tags} 
+											<tag>{Tag}</tag>
+										{/block:Tags}
+									{/block:HasTags}
+								</post-tags>
+							{/block:Link}
+						</post-chat>
 					{/block:Posts}
 				</post>
 			</barter-content>

@@ -7,8 +7,11 @@ define( [ "barterModule", "jquery", "underscore", "singularData" ],
 				var watchElements = function watchElements( ){
 					_.each( elementList,
 						function( elementData, id ){
-							//console.log( "Watching on " + id );
-							elementData.parseElementContent( );
+							var parsers;
+							if( "parsers" in elementData ){
+								parsers = elementData.parsers;
+							}
+							elementData.parseElementContent( parsers );
 						} );
 				};
 
@@ -22,13 +25,13 @@ define( [ "barterModule", "jquery", "underscore", "singularData" ],
 						delay = 300;
 					}
 					intervalID = setInterval( watchElements, delay );
-					console.debug( "Global element watcher activated.", intervalID );
+					console.debug( "Global element watcher activated. Interval ID: ", intervalID );
 				};
 				activateWatcher( );
 
 				var deactivateWatcher = function deactivateWatcher( ){
 					clearInterval( intervalID );
-					console.debug( "Global element watcher deactivated.", intervalID );
+					console.debug( "Global element watcher deactivated. Interval ID: ", intervalID );
 				};
 
 				this.$get = function( singularData ){
@@ -38,8 +41,26 @@ define( [ "barterModule", "jquery", "underscore", "singularData" ],
 						"activateWatcher": activateWatcher,
 
 						"registerElement": function registerElement( id, scope, options ){
+							if( !( "element" in scope ) ){
+								console.debug( "Cannot register element watcher, element cannot be retrieved!", scope );
+								throw new Error( "cannot register element watcher, element cannot be retrieved" );
+							}
+
+							var parsers;
+							if( typeof options == "object" ){
+								if( "parsers" in options ){
+									elementParsers = elementList[ id ].parsers || [ ];
+									parsers = elementParsers.concat( options.parsers );
+								}
+							}
+
 							if( id in elementList ){
-								throw new Error( "cannot register element watcher, id already exists" )
+								if( parsers ){
+									elementList[ id ].parsers = parsers;
+									return;
+								}
+								console.debug( "Cannot register element watcher, ID already exists! ID: ", id );
+								throw new Error( "cannot register element watcher, id already exists" );
 							}
 
 							//Transform the DOM object into jQuery object.
@@ -51,11 +72,19 @@ define( [ "barterModule", "jquery", "underscore", "singularData" ],
 							var hasElementContent = ( "elementContent" in scope );
 							
 							var elementContent;
-							var parseElementContent = function parseElementContent( ){
+							var parseElementContent = function parseElementContent( parsers ){
 								//Get the content thanks to this: 
 								//	http://stackoverflow.com/questions/8127091/jquery-get-dom-element-as-string
 								scope.elementContent = singularData.encode( scope.element.clone( )
-									.wrap( "<content></content>" ).parent( ).html( ) );
+									.wrap( "<content></content>" ).parent( ).html( ) ) + ";";
+								if( parsers instanceof Array 
+									&& !_.isEmpty( parsers ) )
+								{
+									_.each( parsers,
+										function( parser ){
+											parser( scope );
+										} );
+								}
 								scope.safeApply( );
 							};
 
@@ -71,30 +100,47 @@ define( [ "barterModule", "jquery", "underscore", "singularData" ],
 											|| ( typeof newValue == "string" 
 											&& typeof elementContent == "undefined" ) )
 										{
-											elementContent = newValue
+											elementContent = newValue;
 											return;
 										}
 										elementContent = newValue;
+
+										var changes = _.chain( elementContent.split( ";" ) )
+											.map( function( changeContent ){
+												if( ( /^[^:]+?:[^:]+?$/ ).test( changeContent ) ){
+													return changeContent.split( ":" )[ 0 ];
+												}
+											} )
+											.compact( )
+											.value( );
 
 										//Either use the override listener or use the $on.
 										if( typeof options == "object" ){
 											if( "listener" in options
 												&& typeof options.listener == "function" )
 											{
-												options.listener( );
+												options.listener( changes );
 												return;
 											}
+										}
+
+										if( !_.isEmpty( changes ) ){
+											_.each( changes,
+												function( change ){
+													scope.$emit( "dom-change:" + change );
+												} );
 										}
 										
 										//Now they can listen for this!
 										scope.$emit( "dom-change" );
-									} );	
+									} );
 							};
 
 							//Store the scope. Hope this will work.
 							elementList[ id ] = {
 								"scope": scope,
-								"parseElementContent": parseElementContent
+								"parseElementContent": parseElementContent,
+								"parsers": parsers
 							};
 
 							if( typeof options == "object" ){

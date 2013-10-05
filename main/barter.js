@@ -10,7 +10,7 @@ require( [ "barter-data" ],
 	function( barterData ){
 		require.config( barterData.REQUIREJS_VARIABLES );
 
-		require( [ "less!style/sample.less" ],
+		require( [ "less!xstyle/sample.less" ],
 			function( ){
 
 			} );
@@ -22,8 +22,10 @@ require( [ "barter-data" ],
 
 				"controllerWrap",
 				"safeApply",
+				"inspectElement",
 				"singularData",
 				"elementWatcher",
+				"elementPropertyWatcher",
 				
 				"barterAppDirective",
 				"barterAppController",

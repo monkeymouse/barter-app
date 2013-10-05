@@ -3,7 +3,16 @@ var barterSettings = {
 
 	},
 	"DEFAULT": {
-
+		"barterHeader": [ 
+		],
+		"barterBody": [
+		],
+		"barterFooter": [
+		],
+		"barterContent": [
+		],
+		"barterFunction": [
+		]
 	},
 	"FEATURES": {
 		/*
@@ -31,6 +40,8 @@ var barterSettings = {
 					"name": "feature name",
 					"author": "feature author name",
 					"action": "add|replace|modify",
+					"baseURL": "this url will be appended before every location if given",
+					"":
 					"directives": [
 						{
 							"name": "the same name you assign to your directive script",

@@ -5,6 +5,11 @@ api_version: 1
 threadsafe: true
 
 handlers:
+- url: /main/(.*\.js)
+  mime_type: text/javascript
+  static_files: main/\1
+  upload: main/(.*\.js)
+
 - url: /script/(.*\.js)
   mime_type: text/javascript
   static_files: script/\1

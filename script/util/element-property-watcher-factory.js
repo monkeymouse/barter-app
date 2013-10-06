@@ -68,7 +68,7 @@ define( [ "barterModule", "jquery", "underscore" ],
 											}catch( exception ){
 												property = $( "<content>" 
 														+ property + "</content>" ).html( );
-											}	
+											}
 										}
 										propertyData = {
 											"attribute": attribute,

@@ -126,7 +126,16 @@ define( [ "barterModule", "jquery", "underscore", "singularData" ],
 													}else if( ( /^\d+$/ ).test( content ) ){
 														content = eval( content );
 													}else if( ( /(\<\/?[^\<\>]+\>)+/ ).test( content ) ){
-														content = $( "<content>" + content + "</content>" );
+														try{
+															content = $( content );
+														}catch( exception ){
+															content = $( "<content>" + content + "</content>" );
+														}
+														if( content.prop( "tagName" ) == "CONTENT" ){
+															if( content.find( "*" ).length == 1 ){
+																content = content.html( );
+															}
+														}
 													}
 													changeList[ contentType ] = content;
 													return contentType;

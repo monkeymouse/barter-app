@@ -26,93 +26,101 @@ define( [ "barterModule", "jquery", "underscore" ],
 						}
 
 						var updateProperties = inspectElement( scope.element, properties, scopeType );
+						
 						var propertyList = updateProperties( ); 
+						
 						parsers = _.map( propertyList,
 							function( x, index ){
-								return function parser( scope ){
-									//Let's try to update :D
-									propertyList = updateProperties( );
-									var propertyData = propertyList[ index ];
-									var propertyType = propertyData.name;
-									var propertyData = propertyList[ propertyType ];
+								var propertyData = propertyList[ index ];
+								var propertyType = propertyData.name;
+								
+								return {
+									"parserID": id + ":" + propertyType,
+									"parser": function parser( scope ){
+										//Let's try to update :D
+										propertyList = updateProperties( );
+										var propertyData = propertyList[ index ];
+										var propertyType = propertyData.name;
+										var propertyData = propertyList[ propertyType ];
 
-									if( propertyData === undefined ){
-										/*console.debug( "Property data to be parsed for", propertyType,
-											" is undefined. ", propertyData );*/
-										return;
-									}
-
-									//Property data can be an object containing attribute and property 
-									//	or any data taken from inspecting.
-									if( propertyData !== null
-										&& typeof propertyData == "object" 
-										&& "attribute" in propertyData
-										&& "property" in propertyData )
-									{
-										var attribute = propertyData.attribute;
-										if( attribute === false ){
-											attribute = "[false]";
-										}else if( attribute === null ){
-											attribute = "[null]";
+										if( propertyData === undefined ){
+											/*console.debug( "Property data to be parsed for", propertyType,
+												" is undefined. ", propertyData );*/
+											return;
 										}
-										var property = propertyData.property;
-										if( property === null ){
-											property = "[null]";
-										}else{
-											try{
-												property = $( property );
-												if( _.isEmpty( property ) ){
-													property = property;
-												}else{
-													property = property.clone( )
-														.wrap( "<content></content>" ).parent( ).html( );
+
+										//Property data can be an object containing attribute and property 
+										//	or any data taken from inspecting.
+										if( propertyData !== null
+											&& typeof propertyData == "object" 
+											&& "attribute" in propertyData
+											&& "property" in propertyData )
+										{
+											var attribute = propertyData.attribute;
+											if( attribute === false ){
+												attribute = "[false]";
+											}else if( attribute === null ){
+												attribute = "[null]";
+											}
+											var property = propertyData.property;
+											if( property === null ){
+												property = "[null]";
+											}else{
+												try{
+													property = $( property );
+													if( _.isEmpty( property ) ){
+														property = property;
+													}else{
+														property = property.clone( )
+															.wrap( "<content></content>" ).parent( ).html( );
+													}
+												}catch( exception ){
+													property = $( "<content>" 
+															+ property + "</content>" ).html( );
 												}
-											}catch( exception ){
-												property = $( "<content>" 
-														+ property + "</content>" ).html( );
+											}
+											propertyData = {
+												"attribute": attribute,
+												"property": property
+											};
+											propertyData = propertyType + ":" 
+												+ singularData.encode( JSON.stringify( propertyData ) ) + ";";
+
+										}else{
+											if( propertyData === false ){
+												propertyData = "[false]";
+											}else if( propertyData === null ){
+												propertyData = "[null]";
+											}else{
+												var property;
+												try{
+													property = $( propertyData );
+													if( _.isEmpty( property ) 
+														|| property.prop( "tagName" ) === undefined )
+													{
+														property = propertyData;
+													}else{
+														property = property.clone( )
+															.wrap( "<content></content>" ).parent( ).html( );
+													}
+												}catch( exception ){
+													property = $( "<content>" 
+														+ propertyData + "</content>" ).html( );
+												}
+												propertyData = property;
+											}
+											propertyData = propertyType + ":" 
+												+ singularData.encode( propertyData ) + ";";
+										}
+
+										if( scope !== undefined ){
+											if( "elementContent" in scope ){
+												scope.elementContent += propertyData;
 											}
 										}
-										propertyData = {
-											"attribute": attribute,
-											"property": property
-										};
-										propertyData = propertyType + ":" 
-											+ singularData.encode( JSON.stringify( propertyData ) ) + ";";
-
-									}else{
-										if( propertyData === false ){
-											propertyData = "[false]";
-										}else if( propertyData === null ){
-											propertyData = "[null]";
-										}else{
-											var property;
-											try{
-												property = $( propertyData );
-												if( _.isEmpty( property ) 
-													|| property.prop( "tagName" ) === undefined )
-												{
-													property = propertyData;
-												}else{
-													property = property.clone( )
-														.wrap( "<content></content>" ).parent( ).html( );
-												}
-											}catch( exception ){
-												property = $( "<content>" 
-													+ propertyData + "</content>" ).html( );
-											}
-											propertyData = property;
-										}
-										propertyData = propertyType + ":" 
-											+ singularData.encode( propertyData ) + ";";
+										
+										return propertyData;
 									}
-
-									if( scope !== undefined ){
-										if( "elementContent" in scope ){
-											scope.elementContent += propertyData;
-										}
-									}
-									
-									return propertyData;
 								};
 							} );
 
@@ -120,8 +128,8 @@ define( [ "barterModule", "jquery", "underscore" ],
 							return parsers;
 						}else if( !_.isEmpty( parsers ) && property !== undefined ){
 							_.each( parsers,
-								function( parser ){
-									parser( scope );
+								function( parserData ){
+									parserData.parser( scope );
 								} );
 						}
 					};
@@ -141,9 +149,12 @@ define( [ "barterModule", "jquery", "underscore" ],
 					if( _.isEmpty( parsers ) ){
 						parsers = _.map( propertyList,
 							function( property ){
-								return function parser( scope ){
-									bootParser( scope, property );
-								}
+								return {
+									"parserID": id + ":" + property,
+									"parser": function parser( scope ){
+										bootParser( scope, property );
+									}	
+								};
 							} );
 					}
 

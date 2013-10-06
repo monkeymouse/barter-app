@@ -50,12 +50,21 @@ define( [ "barterModule", "jquery", "underscore", "singularData" ],
 							if( typeof options == "object" ){
 								if( "parsers" in options ){
 									elementParsers = elementList[ id ].parsers || [ ];
-									parsers = elementParsers.concat( options.parsers );
+									parserIDs = _.values( _.pick( elementParsers, "parserID" ) );
+									var parserList = elementList[ id ].parserList;
+									parserList = _.difference( parserList, parserIDs )
+									if( _.isEmpty( parserList ) ){
+										return;
+									}
+									elementList[ id ].parserList = elementList[ id ].parserList
+										.concat( parserList );
+									parsers = _.values( _.pick( elementParsers, "parser" ) );
+									parsers = parsers.concat( options.parsers );
 								}
 							}
 
 							if( id in elementList ){
-								if( parsers ){
+								if( !_.isEmpty( parsers ) ){
 									elementList[ id ].parsers = parsers;
 									if( typeof options == "object" ){
 										if( "callback" in options

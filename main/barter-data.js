@@ -104,7 +104,7 @@ var barterData = {
 			"barterFunctionDirective": "script/directive/barter-function-directive",
 			"barterFunctionController": "script/controller/barter-function-controller"
 		}
-	}
+	},
 
 
 	/*==============================================================================================
@@ -114,7 +114,7 @@ var barterData = {
 	"LESS_VARIABLES": {
 		//Boot resources are styles on verification stage.
 		"boot": [
-		]
+		],
 
 		//Core resources are styles needed by the barter application.
 		"core": [
@@ -139,6 +139,18 @@ var barterData = {
 			"singularData",
 			"elementWatcher",
 			"elementPropertyWatcher",
+
+			"bootShellDirective",
+			"bootShellController",
+
+			"bootBodyDirective",
+			"bootBodyController",
+
+			"bootContentDirective",
+			"bootContentController",
+
+			"bootFunctionDirective",
+			"bootFunctionController",
 			
 			"barterAppDirective",
 			"barterAppController",

@@ -17,7 +17,7 @@ var barterSettings = {
 		],
 		"bootFunction": [
 		]
-	}
+	},
 	"DEFAULT": {
 		"barterHeader": [ 
 		],

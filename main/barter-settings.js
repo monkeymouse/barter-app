@@ -1,6 +1,22 @@
+/*
+	Barter Settings
+		This is loaded when a barter client is verified.
+		This includes barter's core features and extended features.
+		Other clients contains settings similar to this 
+			and can override the core settings but not the feature settings.
+			However, they can disable feature settings.
+*/
 var barterSettings = {
 	"DATA": {
 
+	},
+	"BOOT": {
+		"bootBody": [
+		],
+		"bootContent": [
+		],
+		"bootFunction": [
+		]
 	},
 	"DEFAULT": {
 		"barterHeader": [ 
@@ -22,6 +38,9 @@ var barterSettings = {
 				1. Replace default features.
 				2. Add to default features.
 				3. Modify default features.
+				4. Disable default features.
+					Disabling the feature only needs the feature name
+						and the action: disable
 
 			Note that replacing and modifying default features
 				requires extreme consideration before deploying.
@@ -39,7 +58,7 @@ var barterSettings = {
 				{
 					"name": "feature name",
 					"author": "feature author name",
-					"action": "add|replace|modify",
+					"action": "add|replace|modify|disable",
 					"baseURL": "this url will be appended before every location if given",
 					"":
 					"directives": [

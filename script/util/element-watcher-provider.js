@@ -57,6 +57,13 @@ define( [ "barterModule", "jquery", "underscore", "singularData" ],
 							if( id in elementList ){
 								if( parsers ){
 									elementList[ id ].parsers = parsers;
+									if( typeof options == "object" ){
+										if( "callback" in options
+											&& typeof options.callback == "function" )
+										{
+											options.callback( );
+										}
+									}
 									return;
 								}
 								console.debug( "Cannot register element watcher, ID already exists! ID: ", id );
@@ -96,6 +103,7 @@ define( [ "barterModule", "jquery", "underscore", "singularData" ],
 										if( !newValue && !elementContent ){
 											return;
 										}
+
 										if( newValue == elementContent 
 											|| ( typeof newValue == "string" 
 											&& typeof elementContent == "undefined" ) )
@@ -104,38 +112,64 @@ define( [ "barterModule", "jquery", "underscore", "singularData" ],
 											return;
 										}
 										elementContent = newValue;
-
+										console.debug( elementContent );
 										var changeList = { };
-										var changes = _.chain( elementContent.split( ";" ) )
+										var contents = _.compact( elementContent.split( ";" ) );
+										var changes = _.chain( contents )
 											.map( function( changeContent ){
 												if( ( /^[^:]+?:[^:]+?$/ ).test( changeContent ) ){
-													return changeContent.split( ":" )[ 0 ];
+													var contentData = changeContent.split( ":" );
+													var contentType = contentData[ 0 ];
+													var content = singularData.decode( contentData[ 1 ] );
+													if( ( /\[null\]|\[false\]/ ).test( content ) ){
+														content = eval( content.replace( /\[|\]/, "" ) );
+													}else if( ( /^\d+$/ ).test( content ) ){
+														content = eval( content );
+													}else if( ( /(\<\/?[^\<\>]+\>)+/ ).test( content ) ){
+														try{
+															content = $( content );
+														}catch( exception ){
+															content = $( "<content>" + content + "</content>" );
+														}
+														if( content.prop( "tagName" ) == "CONTENT" ){
+															if( content.find( "*" ).length == 1 ){
+																content = content.html( );
+															}
+														}
+													}
+													changeList[ contentType ] = content;
+													return contentType;
 												}else{
-													changeList[ "element" ] = $( singularData.decode( changeContent ) );
+													changeList[ "element" ] = $( "<content>" 
+															+ singularData.decode( changeContent )
+														+ "</content>" );
 												}
 											} )
 											.compact( )
 											.value( );
+
+										console.debug( "changeList: ", changeList );
 
 										//Either use the override listener or use the $on.
 										if( typeof options == "object" ){
 											if( "listener" in options
 												&& typeof options.listener == "function" )
 											{
-												options.listener( changes );
+												options.listener( changes, changeList );
 												return;
 											}
 										}
 
 										if( !_.isEmpty( changes ) ){
 											_.each( changes,
-												function( change ){
-													scope.$emit( "dom-change:" + change );
+												function( changeType ){
+													scope.$emit( "dom-change:" + changeType,
+														changeList[ changeType ] );
 												} );
 										}
 										
 										//Now they can listen for this!
-										scope.$emit( "dom-change", changeList[ element ] );
+										scope.$emit( "dom-change", changeList[ "element" ] );
 									} );
 							};
 
@@ -160,7 +194,7 @@ define( [ "barterModule", "jquery", "underscore", "singularData" ],
 								delete elementList[ id ];
 							}
 						}
-					}
+					};
 				};
 			} );
 	} );

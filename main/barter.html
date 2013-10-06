@@ -2,21 +2,22 @@
 <html>
 	<head>
 		<script src="http://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.8/require.min.js" 
-			data-main="./barter.js">
+			data-main="./barter-boot.js">
 		</script>
 		<title barter-title>
 		</title>
 	</head>
 	<body>
 		<barter-app
-			class="hide"
+			class="barter-app hide"
 			access-key="''"
 			email="'barter@gmail.com'"
 			site-url="'barter.tumblr.com'"
-			site-name="'barter'">
+			site-name="'barter'"
+			settings="''">
 		</barter-app>
 		<tumblr-parser
-			class="hide">
+			class="tumblr-parser hide">
 		</tumblr-parser>
 	</body>
 </html>

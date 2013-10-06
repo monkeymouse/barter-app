@@ -6,6 +6,7 @@
 		<script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore-min.js"></script>
 		<script src="//cdnjs.cloudflare.com/ajax/libs/async/0.2.7/async.min.js"></script>
 		<script src="//cdnjs.cloudflare.com/ajax/libs/string.js/1.2.0/string.min.js"></script>
+		<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
 		<title>
 			{block:PostSummary}{PostSummary} - {/block:PostSummary}{Title}
 		</title>
@@ -29,6 +30,19 @@
 					$scope.$watch( "aggregatePostList",
 						function( ){
 							$scope.viewablePostList = $scope.aggregatePostList.slice( 0, $scope.pageLimit );
+						} );
+
+					var updateSize = function updateSize( ){
+						var html = $( "html" );
+						$scope.htmlHeight = html[ 0 ].offsetHeight;
+						$scope.htmlWidth = html[ 0 ].offsetWidth;
+					};
+
+					setInterval( updateSize, 100 );
+
+					$scope.$watch( "htmlHeight",
+						function( ){
+							$( ".banner-viewport" ).height( $scope.htmlHeight - 100 );
 						} );
 				} );
 
@@ -179,7 +193,7 @@
 										break;
 										
 									case "caption":
-										componentData.caption = postComponent.html( ).trim( );
+										componentData.caption = $(postComponent.html( ).trim( )).html();
 										break;
 										
 									case "date":
@@ -336,7 +350,7 @@
 					}
 				}
 			} );
-			barter.directive( "postChat", function( postParser ){
+			/* barter.directive( "postChat", function( postParser ){
 				return {
 					//The restrict is used to assign the directive to the tag name for E.
 					"restrict": "E",
@@ -398,211 +412,351 @@
 						} );
 					}
 				}
-			} );
+			} ); */
 		</script>
+
+		<style type="text/css">
+
+			.wrapper {
+				.make-row( );
+			}
+			.content-main {
+				.make-lg-column( 8 );
+			}
+			.content-secondary {
+				.make-lg-column( 3 );
+				.make-lg-column-offset( 1 );
+			}
+			.b {
+				padding:0px;
+				background: transparent url("https://dl.dropboxusercontent.com/u/33234657/background.png") no-repeat;
+				background-size: contain; 
+				width:100%;
+				height:100%;
+				display: block;		  
+			}		  
+			.d {
+				padding:0px;
+				background-color:white;
+			}
+
+			.x {
+				padding: 0px;
+				background:transparent;
+			}
+
+			.y {
+				padding:0px;
+				background:transparent;
+			}
+
+			.z {
+				padding:50px;
+				background:yellow;
+			}
+
+			.imagewrap {
+				position: relative;
+			}
+
+			.caption {
+				position: absolute;
+				height:auto;
+				width:100%;
+				bottom: 0;
+				background: rgba(29, 106, 154, 0.72);
+				color: #fff;
+				padding:10px;
+				visibility: hidden;
+				opacity: 0;
+			}
+
+			.imagewrap:hover .caption {
+				visibility: visible;
+				opacity: 1;
+			}
+			
+			body{
+				width: 100%;
+				height: 100%;
+			}
+
+			html{
+				width: 100%;
+				height: 100%;
+			}
+
+			barter-body {
+				margin: 0px;
+				margin-top: 50px;
+			}
+
+			.banner-viewport {
+				margin: 0px;
+				padding: 0px;
+			}
+		</style>
 	</head>
+
 	<body>
 		<barter ng-app="barter">
-			<barter-content ng-controller="ContentController">
+			<!--						 header								  -->
+			<barter-header>
+				<div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+					<div class="navbar-header">
+						<button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+							<span class="sr-only">Toggle navigation</span>
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+							<span class="icon-bar"></span>
+						</button>
+						<a class="navbar-brand" rel="home" href="/" title="ArTEEstic Prints - Homepage">ArTEEstic Prints</a>
+					</div>
+					<div class="collapse navbar-collapse navbar-ex1-collapse">
+						<div class="col-sm-3 col-md-3 pull-right">
+							<form class="navbar-form" role="search">
+								<div class="input-group">
+									<input type="text" class="form-control" placeholder="Search" name="srch-term" id="srch-term">
+										<div class="input-group-btn">
+											<button class="btn btn-default" type="submit"><i class="glyphicon glyphicon-search"></i></button>
+										</div>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+			</barter-header>
+			<barter-body class="b col-md-12">
+				<!--						 posts								  -->			
+				<barter-content ng-controller="ContentController">
+					<div class="banner-viewport col-md-12" style="padding:320px; background:transparent">
+					</div>
+					<div class="wrapper">
+						<div class="content-main">
+							<div class="y col-md-12">
+								<div ng-repeat="post in aggregatePostList" class="d col-md-3">
+									<div ng-show="post.type=='text'">
+										{{post.title}}
+										<br/>
+										{{post.body}}
+									</div>
 
-			<div ng-repeat="post in aggregatePostList">
+									<div ng-show="post.type=='image'" class="imagewrap">
+										<img src="{{post.imageUrl['400']}}" class="x col-md-12" style="padding:0px;" />
+										<div class="caption">
+										  {{post.caption}}
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<post post-list="postList">
+						{block:Posts}
+							<!--
+								Using angular directive, "post-text" tag name will be
+									trnasformed into "postText" camel case format.
 
-				{{post.type}}
-
-
-			</div>
-
-				<post post-list="postList">
-					{block:Posts}
-						<!--
-							Using angular directive, "post-text" tag name will be
-								trnasformed into "postText" camel case format.
-
-							So in order to create your own directive, construct a tag name,
-								Example: "post-image" 
-							Then access the element using the directive "postImage",
-								Example: barter.directive( "postImage", function( ){ } );
-						-->
-						<post-text 
-							post-list="postList" 
-							current-page-number="currentPageNumber">
-							{block:Text}
-								<post-title>
-									{block:Title} 
-										{Title}
-									{/block:Title}
-								</post-title>
-								<post-body>
-									{Body}
-								</post-body>
-								<post-date>
-									{block:Date}
-										{Timestamp}
-									{/block:Date}
-								</post-date>
-								<post-like-count>
-									{block:NoteCount}
-										{NoteCount}
-									{/block:NoteCount}
-								</post-like-count>
-								<post-tags>
-									{block:HasTags}
-										{block:Tags} 
-											<tag>{Tag}</tag>
-										{/block:Tags}
-									{/block:HasTags}
-								</post-tags>
-							{/block:Text}
-						</post-text>
-						<post-image 
-							post-list="postList" 
-							current-page-number="currentPageNumber">
-							{block:Photo}
-								<post-image-url>
-									<image-url type="500">
-										{PhotoURL-500}
-									</image-url>
-									<image-url type="400">
-										{PhotoURL-400}
-									</image-url>
-									<image-url type="250">
-										{PhotoURL-250}
-									</image-url>
-									<image-url type="100">
-										{PhotoURL-100}
-									</image-url>
-									<image-url type="75sq">
-										{PhotoURL-75sq}
-									</image-url>
-    							</post-image-url>
-								<post-caption>
-									{block:Caption} 
-										{Caption}
-									{/block:Caption}
-								</post-caption>
-								<post-date>
-									{block:Date}
-										{Timestamp}
-									{/block:Date}
-								</post-date>
-								<post-like-count>
-									{block:NoteCount}
-										{NoteCount}
-									{/block:NoteCount}
-								</post-like-count>
-								<post-tags>
-									{block:HasTags}
-										{block:Tags} 
-											<tag>{Tag}</tag>
-										{/block:Tags}
-									{/block:HasTags}
-								</post-tags>
-							{/block:Photo}
-						</post-image>
-						<post-quote 
-							post-list="postList" 
-							current-page-number="currentPageNumber">
-							{block:Quote}
-								<post-quote-line>
-									{Quote}
-								</post-quote-line>
-								<post-source>
-									{Source}
-								</post-source>
-								<post-date>
-									{block:Date}
-										{Timestamp}
-									{/block:Date}
-								</post-date>
-								<post-like-count>
-									{block:NoteCount}
-										{NoteCount}
-									{/block:NoteCount}
-								</post-like-count>
-								<post-tags>
-									{block:HasTags}
-										{block:Tags} 
-											<tag>{Tag}</tag>
-										{/block:Tags}
-									{/block:HasTags}
-								</post-tags>
-							{/block:Quote}
-						</post-quote>
-						<post-link 
-							post-list="postList" 
-							current-page-number="currentPageNumber">
-							{block:Link}
-								<post-link-url>
-									{URL}
-								</post-link-url>
-								<post-link-name>
-									{Name}
-								</post-link-name>
-								<post-description>
-									{Description}
-								</post-description>
-								<post-date>
-									{block:Date}
-										{Timestamp}
-									{/block:Date}
-								</post-date>
-								<post-like-count>
-									{block:NoteCount}
-										{NoteCount}
-									{/block:NoteCount}
-								</post-like-count>
-								<post-tags>
-									{block:HasTags}
-										{block:Tags} 
-											<tag>{Tag}</tag>
-										{/block:Tags}
-									{/block:HasTags}
-								</post-tags>
-							{/block:Link}
-						</post-link>
-						<post-chat 
-							post-list="postList" 
-							current-page-number="currentPageNumber">
-							{block:Chat}
-								<post-title>
-									{block:Title} 
-										{Title}
-									{/block:Title}
-								</post-title>
-								<post-lines>
-									{block:Lines}
-										<line-label>
-											{block:Label}
-													{Label}
-											{/block:Label}
-										</line-label>
-									<line-message>	
-										{Line}
-									</line-message>	
-									{/block:Lines}
-								</post-lines>
-								<post-date>
-									{block:Date}
-										{Timestamp}
-									{/block:Date}
-								</post-date>
-								<post-like-count>
-									{block:NoteCount}
-										{NoteCount}
-									{/block:NoteCount}
-								</post-like-count>
-								<post-tags>
-									{block:HasTags}
-										{block:Tags} 
-											<tag>{Tag}</tag>
-										{/block:Tags}
-									{/block:HasTags}
-								</post-tags>
-							{/block:Link}
-						</post-chat>
-					{/block:Posts}
-				</post>
-			</barter-content>
+								So in order to create your own directive, construct a tag name,
+									Example: "post-image" 
+								Then access the element using the directive "postImage",
+									Example: barter.directive( "postImage", function( ){ } );
+							-->
+							<post-text 
+								post-list="postList" 
+								current-page-number="currentPageNumber">
+								{block:Text}
+									<post-title>
+										{block:Title} 
+											{Title}
+										{/block:Title}
+									</post-title>
+									<post-body>
+										{Body}
+									</post-body>
+									<post-date>
+										{block:Date}
+											{Timestamp}
+										{/block:Date}
+									</post-date>
+									<post-like-count>
+										{block:NoteCount}
+											{NoteCount}
+										{/block:NoteCount}
+									</post-like-count>
+									<post-tags>
+										{block:HasTags}
+											{block:Tags} 
+												<tag>{Tag}</tag>
+											{/block:Tags}
+										{/block:HasTags}
+									</post-tags>
+								{/block:Text}
+							</post-text>
+							<post-image 
+								post-list="postList" 
+								current-page-number="currentPageNumber">
+								{block:Photo}
+									<post-image-url>
+										<image-url type="500">
+											{PhotoURL-500}
+										</image-url>
+										<image-url type="400">
+											{PhotoURL-400}
+										</image-url>
+										<image-url type="250">
+											{PhotoURL-250}
+										</image-url>
+										<image-url type="100">
+											{PhotoURL-100}
+										</image-url>
+										<image-url type="75sq">
+											{PhotoURL-75sq}
+										</image-url>
+									</post-image-url>
+									<post-caption>
+										{block:Caption} 
+											{Caption}
+										{/block:Caption}
+									</post-caption>
+									<post-date>
+										{block:Date}
+											{Timestamp}
+										{/block:Date}
+									</post-date>
+									<post-like-count>
+										{block:NoteCount}
+											{NoteCount}
+										{/block:NoteCount}
+									</post-like-count>
+									<post-tags>
+										{block:HasTags}
+											{block:Tags} 
+												<tag>{Tag}</tag>
+											{/block:Tags}
+										{/block:HasTags}
+									</post-tags>
+								{/block:Photo}
+							</post-image>
+							<post-quote 
+								post-list="postList" 
+								current-page-number="currentPageNumber">
+								{block:Quote}
+									<post-quote-line>
+										{Quote}
+									</post-quote-line>
+									<post-source>
+										{Source}
+									</post-source>
+									<post-date>
+										{block:Date}
+											{Timestamp}
+										{/block:Date}
+									</post-date>
+									<post-like-count>
+										{block:NoteCount}
+											{NoteCount}
+										{/block:NoteCount}
+									</post-like-count>
+									<post-tags>
+										{block:HasTags}
+											{block:Tags} 
+												<tag>{Tag}</tag>
+											{/block:Tags}
+										{/block:HasTags}
+									</post-tags>
+								{/block:Quote}
+							</post-quote>
+							<post-link 
+								post-list="postList" 
+								current-page-number="currentPageNumber">
+								{block:Link}
+									<post-link-url>
+										{URL}
+									</post-link-url>
+									<post-link-name>
+										{Name}
+									</post-link-name>
+									<post-description>
+										{Description}
+									</post-description>
+									<post-date>
+										{block:Date}
+											{Timestamp}
+										{/block:Date}
+									</post-date>
+									<post-like-count>
+										{block:NoteCount}
+											{NoteCount}
+										{/block:NoteCount}
+									</post-like-count>
+									<post-tags>
+										{block:HasTags}
+											{block:Tags} 
+												<tag>{Tag}</tag>
+											{/block:Tags}
+										{/block:HasTags}
+									</post-tags>
+								{/block:Link}
+							</post-link>
+							<!-- <post-chat 
+								post-list="postList" 
+								current-page-number="currentPageNumber">
+								{block:Chat}
+									<post-title>
+										{block:Title} 
+											{Title}
+										{/block:Title}
+									</post-title>
+									<post-lines>
+										{block:Lines}
+											<line-label>
+												{block:Label}
+														{Label}
+												{/block:Label}
+											</line-label>
+										<line-message>	
+											{Line}
+										</line-message>	
+										{/block:Lines}
+									</post-lines>
+									<post-date>
+										{block:Date}
+											{Timestamp}
+										{/block:Date}
+									</post-date>
+									<post-like-count>
+										{block:NoteCount}
+											{NoteCount}
+										{/block:NoteCount}
+									</post-like-count>
+									<post-tags>
+										{block:HasTags}
+											{block:Tags} 
+												<tag>{Tag}</tag>
+											{/block:Tags}
+										{/block:HasTags}
+									</post-tags>
+								{/block:Chat} 
+							</post-chat> -->
+						{/block:Posts}
+					</post>
+				</barter-content>
+				<barter-function>
+					<!-- <div class="content-secondary">
+						<div class="z col-md-3">
+						</div>
+					</div> -->
+				</barter-function>
+			</barter-body>
+			<barter-footer>
+				<nav class="navbar navbar-inverse navbar-fixed-bottom" role="navigation">
+					<!-- Brand and toggle get grouped for better mobile display -->
+					<div class="navbar-header">
+						<a class="navbar-brand" href="#">About</a>
+					</div>
+				</nav>
+			</barter-footer>
 		</barter>
 	</body>
 </html>

@@ -1,4 +1,11 @@
+/*
+	Barter Data
+		The semi-global storage of all initialization data needed by barter app.
+*/
 var barterData = {
+	/*==============================================================================================
+		RequireJS Main Configuration Data
+	*/
 	"REQUIREJS_VARIABLES": {
 		"baseUrl": "../",
 		"packages": [
@@ -14,6 +21,7 @@ var barterData = {
 			}
 		],
 		"paths": {
+			//=============================LIBRARY DEPENDENCIES=====================================
 			"jquery": [
 				"http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min",
 				"library/jquery/jquery.min",
@@ -46,18 +54,32 @@ var barterData = {
 				"library/underscore/underscore"
 			],
 
+			//==============================BARTER SCRIPTS==========================================
+			"barterMain": "main/barter",
 			"barterModule": "script/app/barter-app",
 
 			"controllerWrap": "script/util/controller-wrap-factory",
 			"singularData": "script/util/singular-data-service",
 			"elementWatcher": "script/util/element-watcher-provider",
 			"safeApply": "script/util/safe-apply-factory",
-			"elementProperyWatcher": "script/util/element-property-watcher-factory",
-			"inspectElement": "script/util/inspect-element-factory"
+			"inspectElement": "script/util/inspect-element-factory",
+			"elementPropertyWatcher": "script/util/element-property-watcher-factory",
 			
 			"barterAppDirective": "script/directive/barter-app-directive",
 			"barterAppController": "script/controller/barter-app-controller",
 			
+			"bootShellDirective": "script/directive/boot-shell-directive",
+			"bootShellController": "script/controller/boot-shell-controller",
+
+			"bootBodyDirective": "script/directive/boot-body-directive",
+			"bootBodyController": "script/controller/boot-body-controller",
+
+			"bootContentDirective": "script/directive/boot-content-directive",
+			"bootContentController": "script/controller/boot-content-controller",
+
+			"bootFunctionDirective": "script/directive/boot-function-directive",
+			"bootFunctionController": "script/controller/boot-function-controller",
+
 			"tumblrParserDirective": "script/directive/tumblr-parser-directive",
 			"tumblrParserController": "script/controller/tumblr-parser-controller",
 
@@ -82,5 +104,67 @@ var barterData = {
 			"barterFunctionDirective": "script/directive/barter-function-directive",
 			"barterFunctionController": "script/controller/barter-function-controller"
 		}
+	},
+
+
+	/*==============================================================================================
+		Less Main Configuration.
+			This will be loaded based on resource needed.
+	*/
+	"LESS_VARIABLES": {
+		//Boot resources are styles on verification stage.
+		"boot": [
+		],
+
+		//Core resources are styles needed by the barter application.
+		"core": [
+		]
+	},
+
+
+	/*==============================================================================================
+		Load Order Configuration
+			This will state what are the load orders per specific events.
+	*/
+	"LOAD_ORDER_VARIABLES": {
+		//Load order on verification stage.
+		"onVerify": [
+			"angular",
+
+			"barterModule",
+
+			"controllerWrap",
+			"safeApply",
+			"inspectElement",
+			"singularData",
+			"elementWatcher",
+			"elementPropertyWatcher",
+
+			"bootShellDirective",
+			"bootShellController",
+
+			"bootBodyDirective",
+			"bootBodyController",
+
+			"bootContentDirective",
+			"bootContentController",
+
+			"bootFunctionDirective",
+			"bootFunctionController",
+			
+			"barterAppDirective",
+			"barterAppController",
+			
+			"tumblrParserDirective",
+			"tumblrParserController",
+			
+			"commandCenterDirective",
+			"commandCenterController"
+		],
+
+		//Load order on permitted stage.
+		"onPermitted": [
+
+		]
 	}
 };

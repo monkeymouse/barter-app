@@ -64,6 +64,7 @@ var barterData = {
 			"safeApply": "script/util/safe-apply-factory",
 			"inspectElement": "script/util/inspect-element-factory",
 			"elementPropertyWatcher": "script/util/element-property-watcher-factory",
+			"elementProportion": "script/util/element-proportion-provider",
 			
 			"barterAppDirective": "script/directive/barter-app-directive",
 			"barterAppController": "script/controller/barter-app-controller",
@@ -139,6 +140,7 @@ var barterData = {
 			"singularData",
 			"elementWatcher",
 			"elementPropertyWatcher",
+			"elementProportion",
 
 			"bootShellDirective",
 			"bootShellController",

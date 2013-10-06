@@ -25,7 +25,7 @@ define( [ "barterModule", "jquery" ],
 							}
 						} );
 
-						elementPropertyWatcher( "barter-app", scope, [ "sample-attr" ], 
+						elementPropertyWatcher( "barter-app", scope, [ "sample-attr", "sample-attr2", "this-attr" ], 
 							{
 								"callback": function( ){
 									scope.$on( "dom-change:sample-attr",
@@ -33,16 +33,17 @@ define( [ "barterModule", "jquery" ],
 											console.debug( "Change sample attr: ", sampleAttr );
 											console.log( "Barter app sample attr property of element changes!" );
 										} );
-								}
-							} );
 
-						elementPropertyWatcher( "barter-app", scope, [ "sample-attr2" ], 
-							{
-								"callback": function( ){
 									scope.$on( "dom-change:sample-attr2",
 										function( event, sampleAttr2 ){
 											console.debug( "Change sample attr2: ", sampleAttr2 );
 											console.log( "Barter app sample attr2 property of element changes!" );
+										} );
+
+									scope.$on( "dom-change:this-attr",
+										function( event, thisAttr ){
+											console.debug( "Change this attr: ", thisAttr );
+											console.log( "Barter app this attr property of element changes!" );
 										} );
 								}
 							} );
@@ -53,16 +54,30 @@ define( [ "barterModule", "jquery" ],
 							} );
 
 						setTimeout( function( ){
+							console.debug( "Changing sample-attr to 'Hello World'" );
 							scope.element.attr( "sample-attr", "Hello World" );
 						}, 1000 );
 
 						setTimeout( function( ){
+							console.debug( "Changing sample-attr to ''" );
 							scope.element.attr( "sample-attr", "" );
 						}, 1500 );
 
 						setTimeout( function( ){
-							elementWatcher.deactivateWatcher( );
-						}, 3000 );
+							console.debug( "Changing sample-attr2 to 'Yeah!'" );
+							scope.element.attr( "sample-attr2", "Yeah!" );
+						}, 2000 );
+
+						setTimeout( function( ){
+							console.debug( "Changing sample-attr2 to 'Yeah!2'" );
+							scope.element.attr( "sample-attr2", "Yeah!2" );
+						}, 2000 );
+
+						setTimeout( function( ){
+							console.debug( "Changing this-attr to 'boom!'" );
+							scope.element.attr( "this-attr", "boom!" );
+						}, 4000 );
+
 					}
 				};
 			} );

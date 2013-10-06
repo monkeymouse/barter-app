@@ -36,14 +36,16 @@ define( [ "barterModule", "jquery", "underscore" ],
 									var propertyType = propertyData.name;
 									var propertyData = propertyList[ propertyType ];
 
-									console.debug( "propertyData: ", propertyData );
 									if( propertyData === undefined ){
+										/*console.debug( "Property data to be parsed for", propertyType,
+											" is undefined. ", propertyData );*/
 										return;
 									}
 
 									//Property data can be an object containing attribute and property 
 									//	or any data taken from inspecting.
-									if( typeof propertyData == "object" 
+									if( propertyData !== null
+										&& typeof propertyData == "object" 
 										&& "attribute" in propertyData
 										&& "property" in propertyData )
 									{
@@ -86,7 +88,9 @@ define( [ "barterModule", "jquery", "underscore" ],
 											var property;
 											try{
 												property = $( propertyData );
-												if( _.isEmpty( property ) ){
+												if( _.isEmpty( property ) 
+													|| property.prop( "tagName" ) === undefined )
+												{
 													property = propertyData;
 												}else{
 													property = property.clone( )
@@ -94,10 +98,9 @@ define( [ "barterModule", "jquery", "underscore" ],
 												}
 											}catch( exception ){
 												property = $( "<content>" 
-														+ propertyData.property 
-													+ "</content>" ).html( );
+													+ propertyData + "</content>" ).html( );
 											}
-											propertyData = property;	
+											propertyData = property;
 										}
 										propertyData = propertyType + ":" 
 											+ singularData.encode( propertyData ) + ";";

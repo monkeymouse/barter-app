@@ -112,7 +112,6 @@ define( [ "barterModule", "jquery", "underscore", "singularData" ],
 											return;
 										}
 										elementContent = newValue;
-										console.debug( elementContent );
 										var changeList = { };
 										var contents = _.compact( elementContent.split( ";" ) );
 										var changes = _.chain( contents )
@@ -121,21 +120,23 @@ define( [ "barterModule", "jquery", "underscore", "singularData" ],
 													var contentData = changeContent.split( ":" );
 													var contentType = contentData[ 0 ];
 													var content = singularData.decode( contentData[ 1 ] );
-													if( ( /\[null\]|\[false\]/ ).test( content ) ){
-														content = eval( content.replace( /\[|\]/, "" ) );
-													}else if( ( /^\d+$/ ).test( content ) ){
-														content = eval( content );
-													}else if( ( /(\<\/?[^\<\>]+\>)+/ ).test( content ) ){
+													if( ( /(\<\/?[^\<\>]+\>)+/ ).test( content ) ){
 														try{
 															content = $( content );
 														}catch( exception ){
 															content = $( "<content>" + content + "</content>" );
 														}
-														if( content.prop( "tagName" ) == "CONTENT" ){
+														var tagName = content.prop( "tagName" ).toLowerCase( );
+														if( tagName == "content" ){
 															if( content.find( "*" ).length == 1 ){
 																content = content.html( );
 															}
 														}
+													}
+													if( ( /\[null\]|\[false\]/ ).test( content ) ){
+														content = eval( content.replace( /\[|\]/g, "" ) );
+													}else if( ( /^\d+$/ ).test( content ) ){
+														content = eval( content );
 													}
 													changeList[ contentType ] = content;
 													return contentType;
@@ -147,8 +148,6 @@ define( [ "barterModule", "jquery", "underscore", "singularData" ],
 											} )
 											.compact( )
 											.value( );
-
-										console.debug( "changeList: ", changeList );
 
 										//Either use the override listener or use the $on.
 										if( typeof options == "object" ){

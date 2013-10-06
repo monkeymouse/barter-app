@@ -24,8 +24,8 @@ define( [ "barterModule", "jquery", "underscore" ],
 								var propertyType = propertyData.name || propertyData;
 
 								var properties = { };
-								var attribute;
-								if( element.hasAttr( propertyType ) ){
+								var attribute = element.attr( propertyType );
+								if( attribute !== false || attribute !== undefined ){
 									if( attribute = element.attr( propertyType )
 										|| localScope === "attribute" )
 									{

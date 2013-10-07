@@ -8,10 +8,10 @@ define( [ "barterModule", "jquery", "underscore" ],
 
 				var proportionList = { };
 
-				this.$get = function( singularData ){
+				this.$get = function( singularData, elementPropertyWatcher ){
 					return {
-						"registerProportion": function registerProportion( ){
-
+						"registerProportion": function registerProportion( scope, options ){
+							
 						}
 					};
 				};

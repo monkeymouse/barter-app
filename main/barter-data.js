@@ -62,6 +62,7 @@ var barterData = {
 			"singularData": "script/util/singular-data-service",
 			"elementWatcher": "script/util/element-watcher-provider",
 			"safeApply": "script/util/safe-apply-factory",
+			"registerMultipleEvent": "script/util/register-multiple-event-factory",
 			"inspectElement": "script/util/inspect-element-factory",
 			"elementPropertyWatcher": "script/util/element-property-watcher-factory",
 			"elementProportion": "script/util/element-proportion-provider",

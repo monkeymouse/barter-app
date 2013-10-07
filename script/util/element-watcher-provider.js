@@ -50,15 +50,23 @@ define( [ "barterModule", "jquery", "underscore", "singularData" ],
 							if( typeof options == "object" ){
 								if( "parsers" in options ){
 									elementParsers = elementList[ id ].parsers || [ ];
-									parserIDs = _.values( _.pick( elementParsers, "parserID" ) );
+									
+									parserIDs = _.map( elementParsers,
+										function( parserData ){
+											return parserData.parserID;
+										} );
 									var parserList = elementList[ id ].parserList;
 									parserList = _.difference( parserList, parserIDs )
 									if( _.isEmpty( parserList ) ){
 										return;
 									}
+									
 									elementList[ id ].parserList = elementList[ id ].parserList
 										.concat( parserList );
-									parsers = _.values( _.pick( elementParsers, "parser" ) );
+									parsers = _.map( elementParsers,
+										function( parserData ){
+											return parserData.parser;
+										} );
 									parsers = parsers.concat( options.parsers );
 								}
 							}
@@ -171,13 +179,13 @@ define( [ "barterModule", "jquery", "underscore", "singularData" ],
 										if( !_.isEmpty( changes ) ){
 											_.each( changes,
 												function( changeType ){
-													scope.$emit( "dom-change:" + changeType,
+													scope.$broadcast( "dom-change:" + changeType,
 														changeList[ changeType ] );
 												} );
 										}
 										
 										//Now they can listen for this!
-										scope.$emit( "dom-change", changeList[ "element" ] );
+										scope.$broadcast( "dom-change", changeList[ "element" ] );
 									} );
 							};
 

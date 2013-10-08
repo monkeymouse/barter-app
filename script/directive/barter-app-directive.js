@@ -25,7 +25,7 @@ define( [ "barterModule", "jquery" ],
 							}
 						} );
 
-						elementPropertyWatcher( "barter-app", scope, [ "sample-attr", "sample-attr2", "this-attr" ], 
+						elementPropertyWatcher( "barter-app", scope, [ "sample-attr", "sample-attr2", "this-attr", "offsetWidth" ], 
 							{
 								"callback": function( ){
 									scope.$on( "dom-change:sample-attr",
@@ -44,6 +44,12 @@ define( [ "barterModule", "jquery" ],
 										function( event, thisAttr ){
 											console.debug( "Change this attr: ", thisAttr );
 											console.log( "Barter app this attr property of element changes!" );
+										} );
+
+									scope.$on( "dom-change:offsetWidth",
+										function( event, offsetWidth ){
+											console.debug( "Change this property: ", offsetWidth );
+											console.log( "Barter app offsetWidth property of element changes!" );
 										} );
 								}
 							} );
@@ -71,12 +77,21 @@ define( [ "barterModule", "jquery" ],
 						setTimeout( function( ){
 							console.debug( "Changing sample-attr2 to 'Yeah!2'" );
 							scope.element.attr( "sample-attr2", "Yeah!2" );
-						}, 2000 );
+						}, 2100 );
+
+						setTimeout( function( ){
+							console.debug( "Changing offsetWidth to 1000." );
+							scope.element.css( "width", "1000px" );
+						}, 2300 );
 
 						setTimeout( function( ){
 							console.debug( "Changing this-attr to 'boom!'" );
 							scope.element.attr( "this-attr", "boom!" );
 						}, 4000 );
+
+						/*setTimeout( function( ){
+							elementWatcher.deactivateWatcher( );
+						}, 4100 );*/
 
 					}
 				};

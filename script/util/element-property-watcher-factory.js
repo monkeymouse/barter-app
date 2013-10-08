@@ -33,7 +33,9 @@ define( [ "barterModule", "jquery", "underscore" ],
 							function( x, index ){
 								var propertyData = propertyList[ index ];
 								var propertyType = propertyData.name;
-								
+					
+								var content = $( "<content></content>" );
+
 								return {
 									"parserID": id + ":" + propertyType,
 									"parser": function parser( scope ){
@@ -71,12 +73,11 @@ define( [ "barterModule", "jquery", "underscore" ],
 													if( _.isEmpty( property ) ){
 														property = property;
 													}else{
-														property = property.clone( )
-															.wrap( "<content></content>" ).parent( ).html( );
+														property = content.append( property.clone( ) ).html( );
+														content.empty( );
 													}
 												}catch( exception ){
-													property = $( "<content>" 
-															+ property + "</content>" ).html( );
+													property = $( "<content>" + property + "</content>" ).html( );
 												}
 											}
 											propertyData = {
@@ -100,12 +101,11 @@ define( [ "barterModule", "jquery", "underscore" ],
 													{
 														property = propertyData;
 													}else{
-														property = property.clone( )
-															.wrap( "<content></content>" ).parent( ).html( );
+														property = content.append( property.clone( ) ).html( );
+														content.empty( );
 													}
 												}catch( exception ){
-													property = $( "<content>" 
-														+ propertyData + "</content>" ).html( );
+													property = $( "<content>" + propertyData + "</content>" ).html( );
 												}
 												propertyData = property;
 											}

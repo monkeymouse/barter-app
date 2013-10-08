@@ -5,6 +5,7 @@ define( [ "barterModule", "jquery", "underscore", "singularData" ],
 				var elementList = { };
 
 				var watchElements = function watchElements( ){
+					//console.time( "watch-elements" );
 					_.each( elementList,
 						function( elementData, id ){
 							var parsers;
@@ -13,6 +14,7 @@ define( [ "barterModule", "jquery", "underscore", "singularData" ],
 							}
 							elementData.parseElementContent( parsers );
 						} );
+					//console.timeEnd( "watch-elements" );
 				};
 
 				//Loop for every 100 milliseconds.
@@ -51,23 +53,23 @@ define( [ "barterModule", "jquery", "underscore", "singularData" ],
 								if( "parsers" in options ){
 									elementParsers = elementList[ id ].parsers || [ ];
 									
-									parserIDs = _.map( elementParsers,
+									parserIDs = _.map( options.parsers,
 										function( parserData ){
 											return parserData.parserID;
 										} );
-									var parserList = elementList[ id ].parserList;
-									parserList = _.difference( parserList, parserIDs )
+									var parserList = elementList[ id ].parserList || [ ];
+									parserList = _.difference( parserIDs, parserList );
 									if( _.isEmpty( parserList ) ){
 										return;
 									}
-									
-									elementList[ id ].parserList = elementList[ id ].parserList
+
+									elementList[ id ].parserList = ( elementList[ id ].parserList || [ ] )
 										.concat( parserList );
-									parsers = _.map( elementParsers,
+									parsers = _.map( options.parsers,
 										function( parserData ){
 											return parserData.parser;
 										} );
-									parsers = parsers.concat( options.parsers );
+									parsers = parsers.concat( elementParsers );
 								}
 							}
 
@@ -92,15 +94,19 @@ define( [ "barterModule", "jquery", "underscore", "singularData" ],
 								scope.element = $( scope.element );
 							}
 
-							//This will check if the scope is added before then removed.
+							//This will check if the scope is added-before-then-removed.
 							var hasElementContent = ( "elementContent" in scope );
+
+							//Create a single content dom.
+							var content = $( "<content></content>" );
 							
 							var elementContent;
 							var parseElementContent = function parseElementContent( parsers ){
 								//Get the content thanks to this: 
 								//	http://stackoverflow.com/questions/8127091/jquery-get-dom-element-as-string
-								scope.elementContent = singularData.encode( scope.element.clone( )
-									.wrap( "<content></content>" ).parent( ).html( ) ) + ";";
+								var parsedContent = content.append( scope.element.clone( ) ).html( );
+								content.empty( );
+								scope.elementContent = singularData.encode( parsedContent ) + ";";
 								if( parsers instanceof Array 
 									&& !_.isEmpty( parsers ) )
 								{
@@ -136,26 +142,26 @@ define( [ "barterModule", "jquery", "underscore", "singularData" ],
 												if( ( /^[^:]+?:[^:]+?$/ ).test( changeContent ) ){
 													var contentData = changeContent.split( ":" );
 													var contentType = contentData[ 0 ];
-													var content = singularData.decode( contentData[ 1 ] );
-													if( ( /(\<\/?[^\<\>]+\>)+/ ).test( content ) ){
+													var contentValue = singularData.decode( contentData[ 1 ] );
+													if( ( /(\<\/?[^\<\>]+\>)+/ ).test( contentValue ) ){
 														try{
-															content = $( content );
+															contentValue = $( contentValue );
 														}catch( exception ){
-															content = $( "<content>" + content + "</content>" );
+															contentValue = $( "<content>" + contentValue + "</content>" );
 														}
-														var tagName = content.prop( "tagName" ).toLowerCase( );
+														var tagName = contentValue.prop( "tagName" ).toLowerCase( );
 														if( tagName == "content" ){
-															if( content.find( "*" ).length == 1 ){
-																content = content.html( );
+															if( contentValue.find( "*" ).length == 1 ){
+																contentValue = contentValue.html( );
 															}
 														}
 													}
-													if( ( /\[null\]|\[false\]/ ).test( content ) ){
-														content = eval( content.replace( /\[|\]/g, "" ) );
-													}else if( ( /^\d+$/ ).test( content ) ){
-														content = eval( content );
+													if( ( /\[null\]|\[false\]/ ).test( contentValue ) ){
+														contentValue = eval( contentValue.replace( /\[|\]/g, "" ) );
+													}else if( ( /^\d+$/ ).test( contentValue ) ){
+														contentValue = eval( contentValue );
 													}
-													changeList[ contentType ] = content;
+													changeList[ contentType ] = contentValue;
 													return contentType;
 												}else{
 													changeList[ "element" ] = $( "<content>" 

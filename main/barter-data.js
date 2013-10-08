@@ -156,13 +156,7 @@ var barterData = {
 			"bootFunctionController",
 			
 			"barterAppDirective",
-			"barterAppController",
-			
-			"tumblrParserDirective",
-			"tumblrParserController",
-			
-			"commandCenterDirective",
-			"commandCenterController"
+			"barterAppController"
 		],
 
 		//Load order on permitted stage.

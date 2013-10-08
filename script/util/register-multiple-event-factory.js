@@ -10,9 +10,10 @@ define( [ "barterModule", "underscore" ],
 					}
 					var resultListener = function resultListener( result, index ){
 						resultList[ index ] = result;
-						if( resultList.length == events.length ){
+						if( resultList.length == events.length
+							|| result != resultList[ index ] )
+						{
 							scope.$broadcast( eventName, resultList );
-							resultList = [ ];
 						}
 					};
 					var deregisters = _.map( events,

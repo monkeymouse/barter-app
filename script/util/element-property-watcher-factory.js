@@ -3,7 +3,9 @@ define( [ "barterModule", "jquery", "underscore" ],
 		barterModule.factory( "elementPropertyWatcher",
 			function( elementWatcher, inspectElement, singularData ){
 				return function elementPropertyWatcher( id, scope, properties, options ){
-					if( !( "element" in scope ) ){
+					if( !( "element" in options ) 
+						&& !( "element" in scope ) )
+					{
 						console.debug( "Cannot register element property watcher, element cannot be retrieved!", scope );
 						throw new Error( "cannot register element property watcher, element cannot be retrieved" );
 					}
@@ -43,7 +45,7 @@ define( [ "barterModule", "jquery", "underscore" ],
 										propertyList = updateProperties( );
 										var propertyData = propertyList[ index ];
 										var propertyType = propertyData.name;
-										var propertyData = propertyList[ propertyType ];
+										propertyData = propertyList[ propertyType ];
 
 										if( propertyData === undefined ){
 											/*console.debug( "Property data to be parsed for", propertyType,

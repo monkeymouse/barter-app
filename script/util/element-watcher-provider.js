@@ -2,10 +2,15 @@ define( [ "barterModule", "jquery", "underscore", "singularData" ],
 	function( barterModule ){
 		barterModule.provider( "elementWatcher",
 			function( ){
+				var contentFormat = /^[^:]+?:[^:]+?$/;
+				var htmlFormat = /(\<\/?[^\<\>]+\>)+/;
+				var nullFalseFormat = /\[null\]|\[false\]/;
+				var numberFormat = /^\d+$/;
+				var bracketFormat = /\[|\]/g;
+
 				var elementList = { };
 
 				var watchElements = function watchElements( ){
-					//console.time( "watch-elements" );
 					_.each( elementList,
 						function( elementData, id ){
 							var parsers;
@@ -14,7 +19,6 @@ define( [ "barterModule", "jquery", "underscore", "singularData" ],
 							}
 							elementData.parseElementContent( parsers );
 						} );
-					//console.timeEnd( "watch-elements" );
 				};
 
 				//Loop for every 100 milliseconds.
@@ -43,7 +47,9 @@ define( [ "barterModule", "jquery", "underscore", "singularData" ],
 						"activateWatcher": activateWatcher,
 
 						"registerElement": function registerElement( id, scope, options ){
-							if( !( "element" in scope ) ){
+							if( !( "element" in scope ) 
+								&& !( "element" in options ) )
+							{
 								console.debug( "Cannot register element watcher, element cannot be retrieved!", scope );
 								throw new Error( "cannot register element watcher, element cannot be retrieved" );
 							}
@@ -90,8 +96,15 @@ define( [ "barterModule", "jquery", "underscore", "singularData" ],
 							}
 
 							//Transform the DOM object into jQuery object.
-							if( !( scope.element instanceof jQuery ) ){
+							var element;
+							if( "element" in options ){
+								if( !( options.element instanceof jQuery ) ){
+									options.element = $( options.element );
+								}
+								element = options.element;
+							}else if( !( scope.element instanceof jQuery ) ){
 								scope.element = $( scope.element );
+								element = scope.element;
 							}
 
 							//This will check if the scope is added-before-then-removed.
@@ -104,7 +117,7 @@ define( [ "barterModule", "jquery", "underscore", "singularData" ],
 							var parseElementContent = function parseElementContent( parsers ){
 								//Get the content thanks to this: 
 								//	http://stackoverflow.com/questions/8127091/jquery-get-dom-element-as-string
-								var parsedContent = content.append( scope.element.clone( ) ).html( );
+								var parsedContent = content.append( element.clone( ) ).html( );
 								content.empty( );
 								scope.elementContent = singularData.encode( parsedContent ) + ";";
 								if( parsers instanceof Array 
@@ -135,35 +148,41 @@ define( [ "barterModule", "jquery", "underscore", "singularData" ],
 											return;
 										}
 										elementContent = newValue;
+
 										var changeList = { };
 										var contents = _.compact( elementContent.split( ";" ) );
 										var changes = _.chain( contents )
 											.map( function( changeContent ){
-												if( ( /^[^:]+?:[^:]+?$/ ).test( changeContent ) ){
+												if( contentFormat.test( changeContent ) ){
 													var contentData = changeContent.split( ":" );
 													var contentType = contentData[ 0 ];
 													var contentValue = singularData.decode( contentData[ 1 ] );
-													if( ( /(\<\/?[^\<\>]+\>)+/ ).test( contentValue ) ){
+													if( htmlFormat.test( contentValue ) ){
 														try{
+															//We need to check if this is a valid html element.
 															contentValue = $( contentValue );
 														}catch( exception ){
+															//The content may start with a text node.
+															//Encapsulate it in content tags.
 															contentValue = $( "<content>" + contentValue + "</content>" );
 														}
 														var tagName = contentValue.prop( "tagName" ).toLowerCase( );
 														if( tagName == "content" ){
-															if( contentValue.find( "*" ).length == 1 ){
+															//If the content value only has 1 node that should be a text node.
+															if( contentValue.find( "*" ).length == 0 ){
 																contentValue = contentValue.html( );
 															}
 														}
 													}
-													if( ( /\[null\]|\[false\]/ ).test( contentValue ) ){
-														contentValue = eval( contentValue.replace( /\[|\]/g, "" ) );
-													}else if( ( /^\d+$/ ).test( contentValue ) ){
+													if( nullFalseFormat.test( contentValue ) ){
+														contentValue = eval( contentValue.replace( bracketFormat, "" ) );
+													}else if( numberFormat.test( contentValue ) ){
 														contentValue = eval( contentValue );
 													}
 													changeList[ contentType ] = contentValue;
 													return contentType;
 												}else{
+													//All element content values should be decoded.
 													changeList[ "element" ] = $( "<content>" 
 															+ singularData.decode( changeContent )
 														+ "</content>" );

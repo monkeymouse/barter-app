@@ -17,43 +17,42 @@
 			settings="''"
 			environment="'data-bank'">
 			
+			<!--We put it here because tumblr parses the html before loading-->
 			<tumblr-data>
-				{block:Posts}
+				<!--This will render if a tag url is accessed-->
+				{block:TagPage}
+				<posts-on-tag>
+					<tag>
+						<tag-name>{Tag}</tag-name>
+						<tag-url>{TagURL}</tag-url>
+					</tag>
+				</posts-on-tag>
+				{/block:TagPage}
+				
 				<posts>
+				{block:Posts}
 					{block:Text}
 					<post-text>
 						{block:Title}
-						<post-title>
-							{Title}
-						</post-title>
+						<post-title>{Title}</post-title>
 						{/block:Title}
 
-						<post-body>
-							{Body}
-						</post-body>
+						<post-body>{Body}</post-body>
 						
 						{block:Date}
-						<post-date>
-							{Timestamp}
-						</post-date>
+						<post-date>{Timestamp}</post-date>
 						{/block:Date}
 						
 						{block:NoteCount}
-						<post-like-count>
-							{NoteCount}
-						</post-like-count>
+						<post-like-count>{NoteCount}</post-like-count>
 						{/block:NoteCount}
 						
 						{block:HasTags}
 						<post-tags>
 							{block:Tags} 
 							<tag>
-								<tag-name>
-									{Tag}
-								</tag-name>
-								<tag-url>
-									{URL Safe Tag}
-								</tag-url>
+								<tag-name>{Tag}</tag-name>
+								<tag-url>{TagURL}</tag-url>
 							</tag>
 							{/block:Tags}
 						</post-tags>
@@ -64,67 +63,43 @@
 					{block:Photo}
 					<post-image>
 						<post-image-url>
-							<image-url size="500">
-								{PhotoURL-500}
-							</image-url>
-							<image-url size="400">
-								{PhotoURL-400}
-							</image-url>
-							<image-url size="250">
-								{PhotoURL-250}
-							</image-url>
-							<image-url size="100">
-								{PhotoURL-100}
-							</image-url>
-							<image-url size="75">
-								{PhotoURL-75sq}
-							</image-url>
+							<image-url size="500">{PhotoURL-500}</image-url>
+							<image-url size="400">{PhotoURL-400}</image-url>
+							<image-url size="250">{PhotoURL-250}</image-url>
+							<image-url size="100">{PhotoURL-100}</image-url>
+							<image-url size="75">{PhotoURL-75sq}</image-url>
 							{block:HighRes}
-							<image-url size="1280">
-								{PhotoURL-1280}
-							<image-url>
-							<image-url size="2560">
-								{PhotoURL-2560}
-							<image-url>
+							<image-url size="1280">{PhotoURL-1280}<image-url>
+							<image-url size="2560">{PhotoURL-2560}<image-url>
 							{/block:HighRes}
 						</post-image-url>
 
 						{block:Caption}
-						<post-caption>
-							{Caption}
-						</post-caption>
+						<post-caption>{Caption}</post-caption>
 						{/block:Caption}
 						
 						{block:Date}
-						<post-date>
-							{Timestamp}
-						</post-date>
+						<post-date>{Timestamp}</post-date>
 						{/block:Date}
 						
 						{block:NoteCount}
-						<post-like-count>
-							{NoteCount}
-						</post-like-count>
+						<post-like-count>{NoteCount}</post-like-count>
 						{/block:NoteCount}
 						
 						{block:HasTags}
 						<post-tags>
 							{block:Tags} 
 							<tag>
-								<tag-name>
-									{Tag}
-								</tag-name>
-								<tag-url>
-									{URL Safe Tag}
-								</tag-url>
+								<tag-name>{Tag}</tag-name>
+								<tag-url>{TagURL}</tag-url>
 							</tag>
 							{/block:Tags}
 						</post-tags>
 						{/block:HasTags}
 					</post-image>
 					{/block:Photo}
-				</posts>
 				{/block:Posts}
+				</posts>
 			</tumblr-data>
 		</barter-app>
 	</body>

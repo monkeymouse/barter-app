@@ -1,0 +1,131 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<script src="http://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.8/require.min.js" 
+			data-main="./barter-boot.js">
+		</script>
+		<title barter-title>
+		</title>
+	</head>
+	<body>
+		<barter-app
+			class="barter-app hide"
+			access-key="''"
+			email="'barter@gmail.com'"
+			site-url="'barter.tumblr.com'"
+			site-name="'barter'"
+			settings="''"
+			environment="'data-bank'">
+			
+			<tumblr-data>
+				{block:Posts}
+				<posts>
+					{block:Text}
+					<post-text>
+						{block:Title}
+						<post-title>
+							{Title}
+						</post-title>
+						{/block:Title}
+
+						<post-body>
+							{Body}
+						</post-body>
+						
+						{block:Date}
+						<post-date>
+							{Timestamp}
+						</post-date>
+						{/block:Date}
+						
+						{block:NoteCount}
+						<post-like-count>
+							{NoteCount}
+						</post-like-count>
+						{/block:NoteCount}
+						
+						{block:HasTags}
+						<post-tags>
+							{block:Tags} 
+							<tag>
+								<tag-name>
+									{Tag}
+								</tag-name>
+								<tag-url>
+									{URL Safe Tag}
+								</tag-url>
+							</tag>
+							{/block:Tags}
+						</post-tags>
+						{/block:HasTags}
+					</post-text>
+					{/block:Text}
+
+					{block:Photo}
+					<post-image>
+						<post-image-url>
+							<image-url size="500">
+								{PhotoURL-500}
+							</image-url>
+							<image-url size="400">
+								{PhotoURL-400}
+							</image-url>
+							<image-url size="250">
+								{PhotoURL-250}
+							</image-url>
+							<image-url size="100">
+								{PhotoURL-100}
+							</image-url>
+							<image-url size="75">
+								{PhotoURL-75sq}
+							</image-url>
+							{block:HighRes}
+							<image-url size="1280">
+								{PhotoURL-1280}
+							<image-url>
+							<image-url size="2560">
+								{PhotoURL-2560}
+							<image-url>
+							{/block:HighRes}
+						</post-image-url>
+
+						{block:Caption}
+						<post-caption>
+							{Caption}
+						</post-caption>
+						{/block:Caption}
+						
+						{block:Date}
+						<post-date>
+							{Timestamp}
+						</post-date>
+						{/block:Date}
+						
+						{block:NoteCount}
+						<post-like-count>
+							{NoteCount}
+						</post-like-count>
+						{/block:NoteCount}
+						
+						{block:HasTags}
+						<post-tags>
+							{block:Tags} 
+							<tag>
+								<tag-name>
+									{Tag}
+								</tag-name>
+								<tag-url>
+									{URL Safe Tag}
+								</tag-url>
+							</tag>
+							{/block:Tags}
+						</post-tags>
+						{/block:HasTags}
+					</post-image>
+					{/block:Photo}
+				</posts>
+				{/block:Posts}
+			</tumblr-data>
+		</barter-app>
+	</body>
+</html>

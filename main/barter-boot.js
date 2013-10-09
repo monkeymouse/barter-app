@@ -24,8 +24,6 @@ require( [ "barter-data", "barter-settings" ],
 		//Load all requirejs variables
 		require.config( barterData.REQUIREJS_VARIABLES );
 
-		//TODO: Initialize loading UI here.
-
 		//Load less files on boot process.
 		require( barterData.LESS_VARIABLES.boot );
 
@@ -34,6 +32,6 @@ require( [ "barter-data", "barter-settings" ],
 			function( ){
 				angular.bootstrap( document, [ "barter" ] );
 
-				//TODO: Fire the verification process.
+				//TODO: Fire the verification process
 			} );
 	} );

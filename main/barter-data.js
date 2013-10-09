@@ -7,6 +7,7 @@ var barterData = {
 		RequireJS Main Configuration Data
 	*/
 	"REQUIREJS_VARIABLES": {
+		//================================INITIAL CONFIGURATIONS====================================
 		"baseUrl": "../",
 		"packages": [
 			{
@@ -20,6 +21,7 @@ var barterData = {
 				"main": "less"
 			}
 		],
+
 		"paths": {
 			//=============================LIBRARY DEPENDENCIES=====================================
 			"jquery": [
@@ -80,9 +82,9 @@ var barterData = {
 			"bootContentController": "script/controller/boot-content-controller",
 
 			"bootFunctionDirective": "script/directive/boot-function-directive",
-			"bootFunctionController": "script/controller/boot-function-controller",
+			"bootFunctionController": "script/controller/boot-function-controller"//,
 
-			"tumblrParserDirective": "script/directive/tumblr-parser-directive",
+			/*"tumblrParserDirective": "script/directive/tumblr-parser-directive",
 			"tumblrParserController": "script/controller/tumblr-parser-controller",
 
 			"commandCenterDirective": "script/directive/command-center-directive",
@@ -104,7 +106,7 @@ var barterData = {
 			"barterContentController": "script/controller/barter-content-controller",
 
 			"barterFunctionDirective": "script/directive/barter-function-directive",
-			"barterFunctionController": "script/controller/barter-function-controller"
+			"barterFunctionController": "script/controller/barter-function-controller"*/
 		}
 	},
 
@@ -134,6 +136,7 @@ var barterData = {
 			"angular",
 
 			"barterModule",
+			"barterMain",
 
 			"controllerWrap",
 			"safeApply",

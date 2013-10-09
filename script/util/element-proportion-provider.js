@@ -48,7 +48,26 @@ define( [ "barterModule", "jquery", "underscore" ],
 
 				var proportionList = { };
 
-				this.$get = function( singularData, elementPropertyWatcher ){
+				var extractDimensionFactors = function extractDimensionFactors( element ){
+					var locations = [ "top", "left", "bottom", "right" ];
+					//Get margins
+					var dimensionFactors = { };
+					var margin;
+					var border;
+					var padding;
+					_.each( locations,
+						function( location ){
+							margin = "margin-" + location;
+							border = "border-" + location;
+							padding = "padding-" + padding;
+							dimensionFactors[ margin ] = element.css( margin );
+							dimensionFactors[ border ] = element.css( border );
+							dimensionFactors[ padding ] = element.css( padding );
+						} );
+					return dimensionFactors;
+				};
+
+				this.$get = function( registerMultipleEvent, elementPropertyWatcher ){
 					return {
 						"registerProportion": function registerProportion( scope, options ){
 							var element;
@@ -75,14 +94,44 @@ define( [ "barterModule", "jquery", "underscore" ],
 								}
 								parent = options.parent;
 							}
+							options.element = parent;
 
-							if( "adapt" in options ){
-								
-							}else if( "relative" in options ){
-
-							}else{
-
+							var id = options.name || parent.attr( "id" );
+							if( !id ){
+								console.debug( "Cannot register without an id." );
+								throw new Error( "cannot register without an id" );
 							}
+
+							var observedProperties = [ "offsetWidth", "offsetHeight" ];
+
+							var listener;
+							if( "adapt" in options ){
+								listener = function( eventData, resultList ){
+									//This should return results in order width then height.
+									var parentWidth = resultList[ 0 ].result;
+									var parentHeight = resultList[ 1 ].result;
+									var elementDimensionFactors = extractDimensionFactors( element );
+									var parentDimensionFactors = extractDimensionFactors( parent );
+
+								};
+							}else if( "relative" in options ){
+								listener = function( eventData, results ){
+									//This should return results in order width then height.
+									var parentWidth = resultList[ 0 ].result;
+									var parentHeight = resultList[ 1 ].result;
+									var elementDimensionFactors = extractDimensionFactors( element );
+									var parentDimensionFactors = extractDimensionFactors( parent );
+
+								};
+							}else{
+								console.debug( "Cannot register without proportion configuration.", options );
+								throw new Error( "cannot register without proportion configuraiton" );
+							}
+							options.callback = function( ){
+								registerMultipleEvent( observedProperties, scope, "dom-change" );
+								scope.$on( "dom-change:" + observedProperties.join( "+" ), listener );
+							};
+							elementPropertyWatcher( id, scope, observedProperties, options );
 						}
 					};
 				};

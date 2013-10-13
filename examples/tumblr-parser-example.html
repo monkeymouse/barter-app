@@ -1,0 +1,159 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.0.7/angular.min.js"></script>
+		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+		<script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore-min.js"></script>
+		<script src="//cdnjs.cloudflare.com/ajax/libs/async/0.2.7/async.min.js"></script>
+		<script src="//cdnjs.cloudflare.com/ajax/libs/string.js/1.2.0/string.min.js"></script>
+		<!--script src="http://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.8/require.min.js" 
+			data-main="./barter-boot.js">
+		</script-->
+		<script>
+			var barterModule = angular.module( "barter", [ ] );
+
+			barterModule.directive( "posts",
+				function( ){
+					return {
+						"restrict": "E",
+						"link": function( scope, element ){
+							console.debug( element );
+							var postList = [ ];
+							var posts = $( element ).children( );
+							console.debug( posts );
+							posts.each( function( ){
+								var post = $( this );
+								var postType = post.prop( "tagName" ).toLowerCase( )
+									.split( "post-" )[ 1 ];
+								var postData = {
+									"type": postType,
+									"components": { }
+								};
+								postList.push( postData );
+								var components = postData.components;
+								var postComponents = post.children( );
+								console.debug( postComponents );
+								postComponents.each( function( ){
+									var component = $( this );
+									var componentType = component.prop( "tagName" ).toLowerCase( )
+										.split( "post-" )[ 1 ];
+									componentType = S( componentType ).camelize( );
+									var content = component.html( )
+										.replace( /\n+/g, "" )
+										.replace( /\s+/g, " " );
+									if( ( /\<[^\<\>]+\>/ ).test( content ) ){
+										content = $( content );
+										var contentType = content.prop( "tagName" ).toLowerCase( );
+										switch( contentType ){
+											
+										}
+									}
+									components[ componentType ] = content;
+								} );
+							} );
+							console.debug( postList );
+						}
+					};
+				} );
+
+		</script>
+		<title barter-title>
+		</title>
+	</head>
+	<body ng-app="barter">
+		<barter-app
+			class="barter-app hide"
+			access-key="''"
+			email="'barter@gmail.com'"
+			site-url="'barter.tumblr.com'"
+			site-name="'barter'"
+			settings="''"
+			environment="'data-bank'">
+			
+			<!--We put it here because tumblr parses the html before loading-->
+			<tumblr-data>
+				<!--This will render if a tag url is accessed-->
+				{block:TagPage}
+				<posts-on-tag>
+					<tag>
+						<tag-name>{Tag}</tag-name>
+						<tag-url>{TagURL}</tag-url>
+					</tag>
+				</posts-on-tag>
+				{/block:TagPage}
+				
+				<posts>
+				{block:Posts}
+					{block:Text}
+					<post-text>
+						{block:Title}
+						<post-title>{Title}</post-title>
+						{/block:Title}
+
+						<post-body>{Body}</post-body>
+						
+						{block:Date}
+						<post-date>{Timestamp}</post-date>
+						{/block:Date}
+						
+						{block:NoteCount}
+						<post-like-count>{NoteCount}</post-like-count>
+						{/block:NoteCount}
+						
+						{block:HasTags}
+						<post-tags>
+							{block:Tags} 
+							<tag>
+								<tag-name>{Tag}</tag-name>
+								<tag-url>{TagURL}</tag-url>
+							</tag>
+							{/block:Tags}
+						</post-tags>
+						{/block:HasTags}
+					</post-text>
+					{/block:Text}
+
+					{block:Photo}
+					<post-image>
+						<post-image-url>
+							<image-url size="500">{PhotoURL-500}</image-url>
+							<image-url size="400">{PhotoURL-400}</image-url>
+							<image-url size="250">{PhotoURL-250}</image-url>
+							<image-url size="100">{PhotoURL-100}</image-url>
+							<image-url size="75">{PhotoURL-75sq}</image-url>
+							{block:HighRes}
+							<image-url size="1280">{PhotoURL-1280}<image-url>
+							<image-url size="2560">{PhotoURL-2560}<image-url>
+							{/block:HighRes}
+						</post-image-url>
+
+						{block:Caption}
+						<post-caption>{Caption}</post-caption>
+						{/block:Caption}
+						
+						{block:Date}
+						<post-date>{Timestamp}</post-date>
+						{/block:Date}
+						
+						{block:NoteCount}
+						<post-like-count>{NoteCount}</post-like-count>
+						{/block:NoteCount}
+						
+						{block:HasTags}
+						<post-tags>
+							{block:Tags} 
+							<tag>
+								<tag-name>{Tag}</tag-name>
+								<tag-url>{TagURL}</tag-url>
+							</tag>
+							{/block:Tags}
+						</post-tags>
+						{/block:HasTags}
+					</post-image>
+					{/block:Photo}
+				{/block:Posts}
+				</posts>
+			</tumblr-data>
+		</barter-app>
+	</body>
+</html>

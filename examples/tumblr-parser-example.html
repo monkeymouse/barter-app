@@ -6,12 +6,57 @@
 		<script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore-min.js"></script>
 		<script src="//cdnjs.cloudflare.com/ajax/libs/async/0.2.7/async.min.js"></script>
 		<script src="//cdnjs.cloudflare.com/ajax/libs/string.js/1.2.0/string.min.js"></script>
-		<script src="//cdnjs.cloudflare.com/ajax/libs/less.js/1.4.1/less.min"></script>
+		<script src="//cdnjs.cloudflare.com/ajax/libs/less.js/1.4.1/less.min.js"></script>
+
+		<script src="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+		<link href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet"></link>
 		<!--script src="http://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.8/require.min.js" 
 			data-main="./barter-boot.js">
 		</script-->
+
+		<style>
+			.shell {
+				display: block;
+				padding: 0px !important;
+			}
+
+			.header {
+				display: block;
+				height: 10% !important;
+				padding: 0px !important;
+			}
+
+			.body {
+				display: block;
+				height: 85% !important;
+				overflow: hidden;
+				padding: 0px !important;
+			}
+
+			.body * {
+				display: block !important;
+			}
+
+			.footer {
+				display: block;
+				height: 5% !important; 
+				padding: 0px !important;
+			}
+		</style>
+
 		<script>
 			var barterModule = angular.module( "barter", [ ] );
+
+			barterModule.directive( "barterShell",
+				function( ){
+					return {
+						"restrict": "E",
+						"link": function( scope, element ){
+							$( element ).width( window.innerWidth )
+								.height( window.innerHeight );
+						}
+					};
+				} )
 
 			barterModule.directive( "imagesContainer",
 				function( $timeout ){
@@ -405,7 +450,7 @@
 	</head>
 	<body ng-app="barter">
 		<barter-app
-			class="barter-app hide"
+			class="barter-app"
 			access-key="''"
 			email="'barter@gmail.com'"
 			site-url="'barter.tumblr.com'"
@@ -413,10 +458,10 @@
 			settings="''"
 			environment="'data-bank'">
 
-			<barter-shell>
-				<barter-header>
+			<barter-shell class="shell col-md-12">
+				<barter-header class="header col-md-12">
 				</barter-header>
-				<barter-body>
+				<barter-body class="body col-md-12">
 					<barter-content>
 						<barter-posts>
 						</barter-posts>
@@ -424,12 +469,12 @@
 					<barter-function>	
 					</barter-function>
 				</barter-body>
-				<barter-footer>
+				<barter-footer class="footer col-md-12">
 				</barter-footer>
 			</barter-shell>			
 			
 			<!--We put it here because tumblr parses the html before loading-->
-			<tumblr-data>
+			<tumblr-data class="hide">
 				<!--This will render if a tag url is accessed-->
 				{block:TagPage}
 				<posts-on-tag>

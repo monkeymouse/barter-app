@@ -6,6 +6,7 @@
 		<script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore-min.js"></script>
 		<script src="//cdnjs.cloudflare.com/ajax/libs/async/0.2.7/async.min.js"></script>
 		<script src="//cdnjs.cloudflare.com/ajax/libs/string.js/1.2.0/string.min.js"></script>
+		<script src="//cdnjs.cloudflare.com/ajax/libs/less.js/1.4.1/less.min"></script>
 		<!--script src="http://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.8/require.min.js" 
 			data-main="./barter-boot.js">
 		</script-->
@@ -17,10 +18,10 @@
 					return {
 						"restrict": "E",
 						"link": function( scope, element ){
-							console.debug( element );
+
 							var postList = [ ];
+							
 							var posts = $( element ).children( );
-							console.debug( posts );
 							posts.each( function( ){
 								var post = $( this );
 								var postType = post.prop( "tagName" ).toLowerCase( )
@@ -30,28 +31,80 @@
 									"components": { }
 								};
 								postList.push( postData );
+								
 								var components = postData.components;
 								var postComponents = post.children( );
-								console.debug( postComponents );
 								postComponents.each( function( ){
 									var component = $( this );
 									var componentType = component.prop( "tagName" ).toLowerCase( )
 										.split( "post-" )[ 1 ];
-									componentType = S( componentType ).camelize( );
-									var content = component.html( )
+									componentType = S( componentType ).camelize( ).toString( );
+									var contents = component.html( )
 										.replace( /\n+/g, "" )
 										.replace( /\s+/g, " " );
-									if( ( /\<[^\<\>]+\>/ ).test( content ) ){
-										content = $( content );
-										var contentType = content.prop( "tagName" ).toLowerCase( );
-										switch( contentType ){
-											
+
+									if( ( /\<[^\<\>]+\>/ ).test( contents ) ){
+										contents = $( contents );
+										var contentList = [ ];
+										//This will remove unwanted data.
+										contents.each( function(){
+												var content = $( this );
+												var contentType = ( content.prop( "tagName" ) || "" ).toLowerCase( );
+												if( contentType ){
+													contentList.push( content );
+												}
+											} );
+
+										switch( componentType ){
+											case "caption":
+											case "description":
+												var dataList = { };
+												var currentHeader = "heading";
+												var currentContents = null;
+												_.each( contentList,
+													function( content ){
+														var contentValue = content.html( ).trim( );
+														if( ( /^[-\w\s]+\:/ ).test( contentValue ) ){
+															currentHeader = contentValue.match( /^[-\w\s]+/ )[ 0 ].trim( );
+															currentHeader = S( currentHeader.toLowerCase( ) ).dasherize( ).toString( );
+															dataList[ currentHeader ] = currentContents = [ ];
+														}else if( contentValue ){
+															dataList[ currentHeader ].push( contentValue );
+														}
+													} );
+												contentList = dataList;	
+												break;
+
+											case "imageUrl":
+												var dataList = { };
+												_.each( contentList,
+													function( content ){
+														var size = content.attr( "size" );
+														var url = content.html( ).trim( );
+														if( url ){
+															dataList[ size ] = url;
+														}
+													} );
+												contentList = dataList;
+												break;
+
+											case "tags":
+												var dataList = { };
+												_.each( contentList,
+													function( content ){
+														var name = $( "tag-name", content ).html( ).trim( );
+														var url = $( "tag-url", content ).html( ).trim( );
+														dataList[ name ] = url;
+													} );
+												contentList = dataList
+												break;
 										}
+
+										contents = contentList;
 									}
-									components[ componentType ] = content;
+									components[ componentType ] = contents;
 								} );
 							} );
-							console.debug( postList );
 						}
 					};
 				} );
@@ -69,6 +122,8 @@
 			site-name="'barter'"
 			settings="''"
 			environment="'data-bank'">
+
+			
 			
 			<!--We put it here because tumblr parses the html before loading-->
 			<tumblr-data>
@@ -122,8 +177,8 @@
 							<image-url size="100">{PhotoURL-100}</image-url>
 							<image-url size="75">{PhotoURL-75sq}</image-url>
 							{block:HighRes}
-							<image-url size="1280">{PhotoURL-1280}<image-url>
-							<image-url size="2560">{PhotoURL-2560}<image-url>
+							<image-url size="1280">{PhotoURL-1280}</image-url>
+							<image-url size="2560">{PhotoURL-2560}</image-url>
 							{/block:HighRes}
 						</post-image-url>
 

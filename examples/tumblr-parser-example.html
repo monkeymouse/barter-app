@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html>
 	<head>
-		<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.0.7/angular.min.js"></script>
+		<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.0-rc.2/angular.min.js"></script>
 		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 		<script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore-min.js"></script>
 		<script src="//cdnjs.cloudflare.com/ajax/libs/async/0.2.7/async.min.js"></script>
@@ -13,12 +13,291 @@
 		<script>
 			var barterModule = angular.module( "barter", [ ] );
 
+			barterModule.directive( "imagesContainer",
+				function( $timeout ){
+					return {
+						"require": "^?",
+						"restrict": "E",
+						"controller": "BarterPostsController",
+						"scope": {
+							"data": "=?"
+						},
+						"template":
+							"<div class=\"image-pane\" " +
+								"ng-repeat=\"image in imageList\" " +
+								"size=\"{{ image.size }}\">" +
+								"<div class=\"image\" " +
+									"style=\"background-image: url('{{ image.url }}')\">" + 
+								"</div>" +
+								"<img src=\"{{ image.url }}\" />" +
+							"</div>",
+						"link": function( scope, element ){
+							$timeout( function( ){
+								scope.imageList = _.compact( _.map( scope.data,	
+									function( url, size ){
+										if( ( /^\@.+/ ).test( name ) ){
+											return null;
+										}
+										return {
+											"size": size,
+											"url": url
+										};
+									} ) );	
+							}, 0 );
+						}
+					};
+				} );
+
+			barterModule.directive( "dateContainer",
+				function( $timeout ){
+					return {
+						"require": "^?",
+						"restrict": "E",
+						"controller": "BarterPostsController",
+						"scope": {
+							"data": "=?"
+						},
+						"template":
+							"<div class=\"date-pane\">" +
+								"<span ng-bind=\"formattedDate\"></span>" +
+							"</div>",
+						"link": function( scope, element ){
+							$timeout( function( ){
+								scope.formattedDate = scope.data;	
+							}, 0 );
+						}
+					}
+				} );
+
+			barterModule.directive( "tagsContainer",
+				function( $timeout ){
+					return {
+						"require": "^?",
+						"restrict": "E",
+						"controller": "BarterPostsController",
+						"scope": {
+							"data": "=?"
+						},
+						"template":
+							"<div class=\"tag-pane\" " +
+								"ng-repeat=\"tag in tagList\">" +
+								"<a href=\"tag.url\">" +
+									"<span ng-bind=\"tag.name\"></span>" +
+								"</a>" +
+							"</div>",
+						"link": function( scope, element ){
+							$timeout( function( ){
+								scope.tagList = _.compact( _.map( scope.data,	
+									function( url, name ){
+										if( ( /^\@.+/ ).test( name ) ){
+											return null;
+										}
+										return {
+											"name": name,
+											"url": url
+										};
+									} ) );	
+							}, 0 );
+						}
+					};
+				} );
+
+			barterModule.directive( "barterTextPost",
+				function( ){
+					return {
+						"require": "^?",
+						"restrict": "E",
+						"controller": "BarterPostsController",
+						"scope": {
+							"reference": "@?",
+							"data": "=?"
+						},
+						"template": 
+							"<div class=\"post-text-container\">" +
+								"<div class=\"data-container\">" +
+									"<div class=\"heading-container\">" + 
+										"<p ng-repeat=\"paragraph in headings\" " +
+											"ng-bind=\"paragraph\"></p>" + 
+									"</div>" + 
+									"<div class=\"title-container\">" + 
+										"<span ng-bind=\"title\"></span>" +
+									"</div>" + 
+									"<div class=\"description-container\">" +
+										"<p ng-repeat=\"paragraph in descriptions\" " +
+											"ng-bind=\"paragraph\"></p>" + 
+									"</div>" + 
+									"<div class=\"extended-data-container\">" +
+										"<div class=\"extended-data-pane\" " +
+											"ng-repeat=\"data in extendedDataList\">" +
+											"<span ng-bind=\"data.title\"></span>" +
+											"<p ng-repeat=\"paragraph in data.descriptions\" " +
+												"ng-bind=\"paragraph\"></p>" +
+										"</div>" +
+									"</div>" +
+								"</div>" +
+								"<div class=\"feature-container\">" +
+									"<date-container data=\"date\">" +
+									"</date-container>" +
+									"<tags-container data=\"tagList\">" +
+									"</tags-container>" +
+								"</div>" +
+							"</div>",
+						"link": function( scope, element ){
+							scope.headings = scope.data.caption.heading;
+							scope.descriptions = scope.data.caption.description;
+							scope.title = scope.data.caption.title;
+							scope.extendedDataList = _.compact( _.map( scope.data.caption,
+								function( value, key ){
+									if( !_.contains( [ "headings", "title", "description" ], key ) ){
+										return {
+											"title": key,
+											"descriptions": value
+										};
+									}
+									return null;
+								} ) );
+							scope.date = scope.data.date;
+							scope.tagList = scope.data.tags;
+						}
+					};
+				} );
+
+			barterModule.directive( "barterImagePost",
+				function( ){
+					return {
+						"require": "^?",
+						"restrict": "E",
+						"controller": "BarterPostsController",
+						"scope": {
+							"reference": "@?",
+							"data": "=?"
+						},
+						"template":
+							"<div class=\"post-image-container\">" +
+								"<div class=\"image-container\">" +
+									"<images-container data=\"imageList\">" +
+									"</images-container>" +
+								"</div>" +
+								"<div class=\"data-container\">" +
+									"<div class=\"heading-container\">" + 
+										"<p ng-repeat=\"paragraph in headings\" " +
+											"ng-bind=\"paragraph\"></p>" + 
+									"</div>" + 
+									"<div class=\"title-container\">" + 
+										"<span ng-bind=\"title\"></span>" +
+									"</div>" + 
+									"<div class=\"description-container\">" +
+										"<p ng-repeat=\"paragraph in descriptions\" " +
+											"ng-bind=\"paragraph\"></p>" + 
+									"</div>" + 
+									"<div class=\"extended-data-container\">" +
+										"<div class=\"extended-data-pane\" " +
+											"ng-repeat=\"data in extendedDataList\">" +
+											"<span ng-bind=\"data.title\"></span>" +
+											"<p ng-repeat=\"paragraph in data.descriptions\" " +
+												"ng-bind=\"paragraph\"></p>" +
+										"</div>" +
+									"</div>" +
+								"</div>" +
+								"<div class=\"feature-container\">" +
+									"<date-container data=\"date\">" +
+									"</date-container>" +
+									"<tags-container data=\"tagList\">" +
+									"</tags-container>" +
+								"</div>" +
+							"</div>",
+						"link": function( scope, element ){
+							scope.headings = scope.data.caption.heading;
+							scope.descriptions = scope.data.caption.description;
+							scope.title = scope.data.caption.title;
+							scope.extendedDataList = _.compact( _.map( scope.data.caption,
+								function( value, key ){
+									if( !_.contains( [ "headings", "title", "description" ], key ) ){
+										return {
+											"title": key,
+											"descriptions": value
+										};
+									}
+									return null;
+								} ) );
+							scope.date = scope.data.date;
+							scope.tagList = scope.data.tags;
+							scope.imageList = scope.data.imageUrl;
+						}
+					};
+				} );
+
+			barterModule.directive( "barterPost",
+				function( $compile ){
+					return {
+						"require": "^?",
+						"restrict": "E",
+						"controller": "BarterPostsController",
+						"scope": {
+							"postType": "@?",
+							"postReference": "@?",
+							"postComponents": "=?"
+						},
+						"link": function( scope, element ){
+							var post;
+							switch( scope.postType ){
+								case "text":
+									post = $( "<barter-text-post></barter-text-post>" )
+										.addClass( "post post-text" );
+									break;
+								case "image":
+									post = $( "<barter-image-post></barter-image-post>" )
+										.addClass( "post post-image" );
+									break;
+							}
+							post.attr( {
+								"data": "postComponents",
+								"reference": scope.postReference,
+								"ng-click": "clickPost( );"
+							} );
+							var container = $( element );
+							container.append( post );
+							$compile( $( "> .post[reference='" + scope.postReference + "']", container )[ 0 ] )( scope );
+						}
+					};
+				} )
+
+			barterModule.directive( "barterPosts",
+				function( ){
+					return {
+						"restrict": "E",
+						"controller": "BarterPostsController",
+						"template": 
+							"<barter-post ng-repeat=\"post in postList\" " +
+								"post-reference=\"{{ post.reference }}\" " +
+								"post-components=\"post.components\" " +
+								"post-type=\"{{ post.type }}\">" + 
+							"</barter-post>",
+						"scope": { },
+						"link": function( scope, element ){
+							var container = $( element );
+							container.on( "set-post-list",
+								function( event, data ){
+									console.debug( data.postList );
+									scope.postList = data.postList;
+								} );
+						}
+					};
+				} );
+
+			barterModule.controller( "BarterPostsController",
+				function( $scope ){
+
+					$scope.clickPost = function clickPost( ){
+
+					};
+				} );
+
 			barterModule.directive( "posts",
 				function( ){
 					return {
 						"restrict": "E",
 						"link": function( scope, element ){
-
 							var postList = [ ];
 							
 							var posts = $( element ).children( );
@@ -28,7 +307,8 @@
 									.split( "post-" )[ 1 ];
 								var postData = {
 									"type": postType,
-									"components": { }
+									"components": { },
+									"reference": Date.now( ) + Math.round( Date.now( ) * Math.random( ) )
 								};
 								postList.push( postData );
 								
@@ -105,6 +385,8 @@
 									components[ componentType ] = contents;
 								} );
 							} );
+
+							$( "barter-posts" ).trigger( "set-post-list", { "postList": postList } );
 						}
 					};
 				} );
@@ -123,7 +405,20 @@
 			settings="''"
 			environment="'data-bank'">
 
-			
+			<barter-shell>
+				<barter-header>
+				</barter-header>
+				<barter-body>
+					<barter-content>
+						<barter-posts>
+						</barter-posts>
+					</barter-content>
+					<barter-function>	
+					</barter-function>
+				</barter-body>
+				<barter-footer>
+				</barter-footer>
+			</barter-shell>			
 			
 			<!--We put it here because tumblr parses the html before loading-->
 			<tumblr-data>

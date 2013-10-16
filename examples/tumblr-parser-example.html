@@ -253,7 +253,7 @@
 							post.attr( {
 								"data": "postComponents",
 								"reference": scope.postReference,
-								"ng-click": "clickPost( );"
+								"ng-click": "clickPost(reference);"
 							} );
 							var container = $( element );
 							container.append( post );
@@ -287,9 +287,17 @@
 
 			barterModule.controller( "BarterPostsController",
 				function( $scope ){
-
-					$scope.clickPost = function clickPost( ){
-
+					$scope.clickPost = function clickPost( reference ){
+						var post = $( ".post[reference='" + reference + "']" );
+						if( post.hasClass( "active-view" ) ){
+							$( ".post" ).removeClass( "active-view" )
+								.find( "*" ).removeClass( "active-view" );	
+						}else{
+							$( ".post" ).removeClass( "active-view" )
+								.find( "*" ).removeClass( "active-view" );
+							post.addClass( "active-view" )
+								.find( "*" ).addClass( "active-view" );	
+						}
 					};
 				} );
 

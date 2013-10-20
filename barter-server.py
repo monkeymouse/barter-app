@@ -1,6 +1,6 @@
 import webapp2
 
-#sample
+#sample2
 class MainPage(webapp2.RequestHandler):
 
     def get(self):

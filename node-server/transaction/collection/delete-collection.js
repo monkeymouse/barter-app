@@ -1,4 +1,4 @@
-var barterDb = require( "../../../barter-db.js" );
+var barterDb = require( "../../barter-db.js" );
 
 exports.deleteCollection = function deleteCollection( collectionName, callback ){
 	barterDb.countData( collectionName, { "type": "schema" },

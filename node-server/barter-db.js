@@ -99,6 +99,13 @@ var countData = function countData( collectionName, query, callback ){
 };
 exports.countData = countData;
 
+exports.hasData = function hasData( collectionName, query, callback ){
+	countData( collectionName, query,
+		function( error, count ){
+			callback( error, ( count || 0 ) > 0 );
+		} );
+};
+
 exports.saveData = function saveData( collectionName, query, data, callback ){
 	accessCollection( collectionName,
 		function( error, collection ){

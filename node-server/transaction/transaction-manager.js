@@ -93,7 +93,7 @@ exports.loadAllTransactions = function loadAllTransactions( ){
 								return;
 							}
 							transactions = _.compact( transactions );
-							console.log( util.inspect( transactions, { "depth": 5 } ) );
+								console.log( util.inspect( transactions, { "depth": 5 } ) );
 						} );
 				} );
 		} );

@@ -1,3 +1,6 @@
 [submodule "library"]
 	path = library
 	url = https://github.com/volkovasystems/library.git
+[submodule "node-server/node_modules"]
+	path = node-server/node_modules
+	url = https://github.com/volkovasystems/node_modules.git

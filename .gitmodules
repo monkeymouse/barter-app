@@ -4,3 +4,6 @@
 [submodule "node-server/node_modules"]
 	path = node-server/node_modules
 	url = https://github.com/volkovasystems/node_modules.git
+[submodule "node-server/ujdi"]
+	path = node-server/ujdi
+	url = https://github.com/volkovasystems/ujdi.git
